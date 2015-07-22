@@ -4,8 +4,7 @@ import android.app.Activity;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.app.Fragment;
-import android.support.v7.internal.widget.AdapterViewCompat;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,13 +32,28 @@ import java.util.List;
 
 public class MoviesFragment extends Fragment {
 
+    final String LOG_TAG = MoviesFragment.class.getSimpleName();
+
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private ArrayAdapter<Movie> mMovieAdapter;
 
     public MoviesFragment() {
         // Required empty public constructor
+
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        updateMovies();
+    }
+
+    private void updateMovies() {
+        Log.v(LOG_TAG, "starting update movies");
+        FetchMoviesTask moviesTask = new FetchMoviesTask();
+        //todo: load sharedprefs here!
+        moviesTask.execute("sort order goes here");
+    }
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,9 +77,9 @@ public class MoviesFragment extends Fragment {
 
         GridView gridView = (GridView) rootView.findViewById(R.id.movieGridView);
         gridView.setAdapter(mMovieAdapter);
-        gridView.setOnClickListener(new View.OnItemClickListener() {
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterViewCompat<?> parent, View view, int position, long id) {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Movie clickedMovie = mMovieAdapter.getItem(position);
             }
         });
@@ -75,6 +89,15 @@ public class MoviesFragment extends Fragment {
     }
 
     public class FetchMoviesTask extends AsyncTask<String, Void, ArrayList<Movie>> {
+        @Override
+        protected void onPostExecute(ArrayList<Movie> movies) {
+            for (Movie m : movies) {
+                Log.v(LOG_TAG, "recieved movie:"+ m.title);
+            }
+            super.onPostExecute(movies);
+            mMovieAdapter.clear();
+            mMovieAdapter.addAll(movies);
+        }
 
         final String LOG_TAG = FetchMoviesTask.class.getSimpleName();
         final String TMDB_RESULTS = "results";
