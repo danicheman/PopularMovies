@@ -49,10 +49,9 @@ public class MoviesFragment extends Fragment {
     }
 
     private void updateMovies() {
-        Log.v(LOG_TAG, "starting update movies");
         FetchMoviesTask moviesTask = new FetchMoviesTask();
         //todo: load sharedprefs here!
-        moviesTask.execute("sort order goes here");
+        moviesTask.execute("sort order goes in here");
     }
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -67,13 +66,15 @@ public class MoviesFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        mMovieAdapter = new ArrayAdapter<Movie>(
+        Log.v(LOG_TAG, "Launching view of Fragment");
+        /*mMovieAdapter = new ArrayAdapter<Movie>(
                 getActivity(),
                 R.layout.fragment_movies,
                 R.id.movieGridView,
-                new ArrayList<Movie>());
+                new ArrayList<Movie>());*/
+        mMovieAdapter = new MovieAdapter(getActivity(), new ArrayList<Movie>());
 
-        View rootView = inflater.inflate(R.layout.fragment_movies, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_movies, container, true);
 
         GridView gridView = (GridView) rootView.findViewById(R.id.movieGridView);
         gridView.setAdapter(mMovieAdapter);
@@ -91,12 +92,15 @@ public class MoviesFragment extends Fragment {
     public class FetchMoviesTask extends AsyncTask<String, Void, ArrayList<Movie>> {
         @Override
         protected void onPostExecute(ArrayList<Movie> movies) {
-            for (Movie m : movies) {
-                Log.v(LOG_TAG, "recieved movie:"+ m.title);
-            }
-            super.onPostExecute(movies);
             mMovieAdapter.clear();
-            mMovieAdapter.addAll(movies);
+
+            for (Movie m : movies) {
+                //Log.v(LOG_TAG, "recieved movie:"+ m.title);
+                mMovieAdapter.add(m);
+            }
+
+
+
         }
 
         final String LOG_TAG = FetchMoviesTask.class.getSimpleName();
