@@ -74,7 +74,7 @@ public class MoviesFragment extends Fragment {
                 new ArrayList<Movie>());*/
         mMovieAdapter = new MovieAdapter(getActivity(), new ArrayList<Movie>());
 
-        View rootView = inflater.inflate(R.layout.fragment_movies, container, true);
+        View rootView = inflater.inflate(R.layout.fragment_movies, container, false);
 
         GridView gridView = (GridView) rootView.findViewById(R.id.movieGridView);
         gridView.setAdapter(mMovieAdapter);
@@ -86,7 +86,7 @@ public class MoviesFragment extends Fragment {
         });
 
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_movies, container, false);
+        return rootView;
     }
 
     public class FetchMoviesTask extends AsyncTask<String, Void, ArrayList<Movie>> {
