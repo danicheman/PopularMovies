@@ -67,11 +67,11 @@ public class MoviesFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         Log.v(LOG_TAG, "Launching view of Fragment");
-        /*mMovieAdapter = new ArrayAdapter<Movie>(
+        mMovieAdapter = new ArrayAdapter<Movie>(
                 getActivity(),
                 R.layout.fragment_movies,
                 R.id.movieGridView,
-                new ArrayList<Movie>());*/
+                new ArrayList<Movie>());
         mMovieAdapter = new MovieAdapter(getActivity(), new ArrayList<Movie>());
 
         View rootView = inflater.inflate(R.layout.fragment_movies, container, false);
