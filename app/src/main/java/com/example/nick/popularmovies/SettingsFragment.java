@@ -34,13 +34,13 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
 
     }
 
-    @Override
+    /*@Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         TextView textView = new TextView(getActivity());
         textView.setText(R.string.hello_blank_fragment);
         return textView;
-    }
+    }*/
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object value) {

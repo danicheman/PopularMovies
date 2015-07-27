@@ -24,11 +24,11 @@ public class SettingsActivity extends Activity
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.settings_container);
+        //setContentView(R.layout.settings_container);
         // Add 'general' preferences, defined in the XML file
         // Display the fragment as the main content.
         getFragmentManager().beginTransaction()
-                .add(R.id.settings, new SettingsFragment())
+                .replace(android.R.id.content, new SettingsFragment())
                 .commit();
                 //.replace(android.R.id.content, new SettingsFragment())
                 //.commit();
