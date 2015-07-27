@@ -19,7 +19,7 @@ import java.util.List;
  */
 public class MovieAdapter extends ArrayAdapter<Movie>{
     private List<Movie> movies;
-    private final String BASE_IMAGE_URL = "http://image.tmdb.org/t/p/w185";
+
     final String LOG_TAG = MoviesFragment.class.getSimpleName();
 
     public MovieAdapter(Context context, List<Movie> movies) {
@@ -43,26 +43,21 @@ public class MovieAdapter extends ArrayAdapter<Movie>{
 
         if (convertView == null) {
             moviePosterView = new ImageView(getContext());
-            //moviePosterView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            //moviePosterView.setLayoutParams(new GridView.LayoutParams(185,278));
-            //moviePosterView.setScaleType(ImageView.ScaleType.FIT_XY);
             moviePosterView.setAdjustViewBounds(true);
             moviePosterView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         } else {
             moviePosterView = (ImageView) convertView;
         }
 
+        Movie m = movies.get(position);
         //.placeholder(R.raw.place_holder)
         //.error(R.raw.big_problem)
         Picasso.with(getContext())
-                .load(getMovieImageLinkAt(position))
+                .load(Constants.getMovieImageLink(m))
                 .into(moviePosterView);
 
         return moviePosterView;
     }
 
-    private String getMovieImageLinkAt(int index) {
-        Movie m = movies.get(index);
-        return BASE_IMAGE_URL + m.imageLink;
-    }
+
 }

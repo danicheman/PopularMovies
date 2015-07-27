@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="sort_order_options">
+        <item>Latest</item>
+        <item>Popularity</item>
+    </string-array>
+    <string-array name="sort_order_option_values">
+        <item>release_date.desc</item>
+        <item>popularity.desc</item>
+    </string-array>
+</resources>

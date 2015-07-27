@@ -1,6 +1,7 @@
 package com.example.nick.popularmovies;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -33,7 +34,7 @@ import java.util.List;
 public class MoviesFragment extends Fragment {
 
     final String LOG_TAG = MoviesFragment.class.getSimpleName();
-
+    public static final String MOVIE_BUNDLE = "movieBundle";
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private ArrayAdapter<Movie> mMovieAdapter;
 
@@ -82,6 +83,9 @@ public class MoviesFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Movie clickedMovie = mMovieAdapter.getItem(position);
+                Intent intent = new Intent(getActivity(), MovieDetailActivity.class)
+                        .putExtra(MOVIE_BUNDLE, clickedMovie);
+                startActivity(intent);
             }
         });
 
@@ -107,9 +111,10 @@ public class MoviesFragment extends Fragment {
         final String TMDB_RESULTS = "results";
         final String TMDB_TITLE = "title";
         final String TMDB_ORIGINAL_TITLE = "original_title";
-        final String TMDB_POPULARITY = "popularity";
+        final String TMDB_VOTE_AVERAGE = "vote_average";
         final String TMDB_IMAGE_LINK = "poster_path";
         final String TMDB_OVERVIEW = "overview";
+        final String TMDB_RELEASE_DATE = "release_date";
 
 
         private Movie[] getMovieDataFromJson(String jsonMovieData) throws JSONException {
@@ -130,7 +135,8 @@ public class MoviesFragment extends Fragment {
                 movies[i].originalTitle = movieData.getString(TMDB_ORIGINAL_TITLE);
                 movies[i].synopsis = movieData.getString(TMDB_OVERVIEW);
                 movies[i].imageLink = movieData.getString(TMDB_IMAGE_LINK);
-                movies[i].userRating = movieData.getDouble(TMDB_POPULARITY);
+                movies[i].userRating = movieData.getDouble(TMDB_VOTE_AVERAGE) / 2; // it's out of 10
+                movies[i].releaseDate = movieData.getString(TMDB_RELEASE_DATE);
             }
 
             return movies;
