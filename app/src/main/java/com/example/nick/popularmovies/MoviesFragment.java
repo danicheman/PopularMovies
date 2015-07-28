@@ -1,10 +1,10 @@
 package com.example.nick.popularmovies;
 
-import android.app.Activity;
 import android.content.Intent;
-import android.net.Uri;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,7 +13,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
-import android.view.View.OnClickListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -27,9 +26,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-
-
 
 public class MoviesFragment extends Fragment {
 
@@ -51,24 +47,29 @@ public class MoviesFragment extends Fragment {
 
     private void updateMovies() {
         FetchMoviesTask moviesTask = new FetchMoviesTask();
-        //todo: load sharedprefs here!
-        moviesTask.execute("sort order goes in here");
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        //get sort order or default value
+        String sortOrder = prefs.getString("sort_order", "invalid one");
+        Log.v(LOG_TAG, "Sort order in movie fragment" +sortOrder);
+        moviesTask.execute(sortOrder);
     }
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-        /*if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }*/
     }
+
+    /*@Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_main, menu);
+    }*/
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         Log.v(LOG_TAG, "Launching view of Fragment");
-        mMovieAdapter = new ArrayAdapter<Movie>(
+        mMovieAdapter = new ArrayAdapter<>(
                 getActivity(),
                 R.layout.fragment_movies,
                 R.id.movieGridView,
@@ -93,18 +94,16 @@ public class MoviesFragment extends Fragment {
         return rootView;
     }
 
-    public class FetchMoviesTask extends AsyncTask<String, Void, ArrayList<Movie>> {
+    public class FetchMoviesTask extends AsyncTask<String, Void, Movie[]> {
+
         @Override
-        protected void onPostExecute(ArrayList<Movie> movies) {
-            mMovieAdapter.clear();
-
-            for (Movie m : movies) {
-                //Log.v(LOG_TAG, "recieved movie:"+ m.title);
-                mMovieAdapter.add(m);
+        protected void onPostExecute(Movie[] movies) {
+            if(movies != null) {
+                mMovieAdapter.clear();
+                for (Movie m : movies) {
+                    mMovieAdapter.add(m);
+                }
             }
-
-
-
         }
 
         final String LOG_TAG = FetchMoviesTask.class.getSimpleName();
@@ -143,75 +142,78 @@ public class MoviesFragment extends Fragment {
         }
 
         @Override
-        protected ArrayList<Movie> doInBackground(String... params) {
+        protected Movie[] doInBackground(String... params) {
 
+            if (params.length == 0) {
+                return null;
+            }
+            String sortOrder = params[0];
+            // These two need to be declared outside the try/catch
+            // so that they can be closed in the finally block.
+            HttpURLConnection urlConnection = null;
+            BufferedReader reader = null;
 
-                // These two need to be declared outside the try/catch
-                // so that they can be closed in the finally block.
-                HttpURLConnection urlConnection = null;
-                BufferedReader reader = null;
+            // Will contain the raw JSON response as a string.
+            String moviesJsonStr = null;
 
-                // Will contain the raw JSON response as a string.
-                String moviesJsonStr = null;
+            try {
+                // Construct the URL for the OpenWeatherMap query
+                // Possible parameters are avaiable at OWM's forecast API page, at
+                // http://openweathermap.org/API#forecast
+                URL url = new URL("http://api.themoviedb.org/3/discover/movie?sort_by="+sortOrder+"&api_key=b8a4068d1466dca29becff1029e0e0e1");
 
-                try {
-                    // Construct the URL for the OpenWeatherMap query
-                    // Possible parameters are avaiable at OWM's forecast API page, at
-                    // http://openweathermap.org/API#forecast
-                    URL url = new URL("http://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&api_key=b8a4068d1466dca29becff1029e0e0e1");
+                // Create the request to OpenWeatherMap, and open the connection
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setRequestMethod("GET");
+                urlConnection.connect();
 
-                    // Create the request to OpenWeatherMap, and open the connection
-                    urlConnection = (HttpURLConnection) url.openConnection();
-                    urlConnection.setRequestMethod("GET");
-                    urlConnection.connect();
-
-                    // Read the input stream into a String
-                    InputStream inputStream = urlConnection.getInputStream();
-                    StringBuffer buffer = new StringBuffer();
-                    if (inputStream == null) {
-                        // Nothing to do.
-                        return null;
-                    }
-                    reader = new BufferedReader(new InputStreamReader(inputStream));
-
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
-                        // But it does make debugging a *lot* easier if you print out the completed
-                        // buffer for debugging.
-                        buffer.append(line + "\n");
-                    }
-
-                    if (buffer.length() == 0) {
-                        // Stream was empty.  No point in parsing.
-                        return null;
-                    }
-                    moviesJsonStr = buffer.toString();
-                } catch (IOException e) {
-                    Log.e("PlaceholderFragment", "Error ", e);
-                    // If the code didn't successfully get the weather data, there's no point in attemping
-                    // to parse it.
+                // Read the input stream into a String
+                InputStream inputStream = urlConnection.getInputStream();
+                StringBuffer buffer = new StringBuffer();
+                if (inputStream == null) {
+                    // Nothing to do.
                     return null;
-                } finally{
-                    if (urlConnection != null) {
-                        urlConnection.disconnect();
-                    }
-                    if (reader != null) {
-                        try {
-                            reader.close();
-                        } catch (final IOException e) {
-                            Log.e("PlaceholderFragment", "Error closing stream", e);
-                        }
-                    }
+                }
+                reader = new BufferedReader(new InputStreamReader(inputStream));
+
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
+                    // But it does make debugging a *lot* easier if you print out the completed
+                    // buffer for debugging.
+                    buffer.append(line + "\n");
                 }
 
-                try {
-                    Movie[] movieArray = getMovieDataFromJson(moviesJsonStr);
-                    return new ArrayList(Arrays.asList(movieArray));
-                } catch (JSONException e) {
-                    Log.e(LOG_TAG, e.getMessage(), e);
-                    e.printStackTrace();
+                if (buffer.length() == 0) {
+                    // Stream was empty.  No point in parsing.
+                    return null;
                 }
+                moviesJsonStr = buffer.toString();
+            } catch (IOException e) {
+                Log.e("PlaceholderFragment", "Error ", e);
+                // If the code didn't successfully get the weather data, there's no point in attemping
+                // to parse it.
+                return null;
+            } finally{
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (final IOException e) {
+                        Log.e("PlaceholderFragment", "Error closing stream", e);
+                    }
+                }
+            }
+
+            try {
+                Movie[] movieArray = getMovieDataFromJson(moviesJsonStr);
+                return movieArray;
+            } catch (JSONException e) {
+                Log.e(LOG_TAG, e.getMessage(), e);
+                e.printStackTrace();
+            }
             return null;
         }
     }

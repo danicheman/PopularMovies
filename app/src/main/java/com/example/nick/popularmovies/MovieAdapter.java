@@ -38,7 +38,6 @@ public class MovieAdapter extends ArrayAdapter<Movie>{
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
-        Log.v(LOG_TAG, "movie adapter getting view at" + position);
         ImageView moviePosterView;
 
         if (convertView == null) {

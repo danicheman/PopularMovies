@@ -1,27 +1,20 @@
 package com.example.nick.popularmovies;
 
-import android.app.Activity;
-import android.net.Uri;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.app.Fragment;
-import android.preference.ListPreference;
-import android.preference.Preference;
 import android.preference.PreferenceFragment;
-import android.preference.PreferenceManager;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
+import android.util.Log;
 
 
 /**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link SettingsFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * create an instance of this fragment.
+ * Settings Fragment to choose sort order
+ *
+ * Can probably remove ShardPreference Changed Class
  */
-public class SettingsFragment extends PreferenceFragment implements Preference.OnPreferenceChangeListener {
+public class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
+
+    final String LOG_TAG = SettingsFragment.class.getSimpleName();
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -29,36 +22,20 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
 
 
         addPreferencesFromResource(R.xml.pref_general);
-
-
+        getPreferenceManager().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
 
     }
 
-    /*@Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        TextView textView = new TextView(getActivity());
-        textView.setText(R.string.hello_blank_fragment);
-        return textView;
-    }*/
-
+    /**
+     * Settings automatically update in shared preferences so this is just for echoing
+     *
+     * @param sharedPreferences
+     * @param key
+     */
     @Override
-    public boolean onPreferenceChange(Preference preference, Object value) {
-        String stringValue = value.toString();
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        String value = sharedPreferences.getString(key, "not set");
+        Log.v(LOG_TAG, "what changed key:"+key+"value"+value);
 
-        if (preference instanceof ListPreference) {
-            // For list preferences, look up the correct display value in
-            // the preference's 'entries' list (since they have separate labels/values).
-            ListPreference listPreference = (ListPreference) preference;
-            int prefIndex = listPreference.findIndexOfValue(stringValue);
-            if (prefIndex >= 0) {
-                preference.setSummary(listPreference.getEntries()[prefIndex]);
-            }
-        } else {
-            // For other preferences, set the summary to the value's simple string representation.
-            preference.setSummary(stringValue);
-        }
-        return true;
     }
-
 }
