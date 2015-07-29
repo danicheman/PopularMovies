@@ -29,6 +29,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     /**
      * Settings automatically update in shared preferences so this is just for echoing
      *
+     *
      * @param sharedPreferences
      * @param key
      */

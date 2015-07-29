@@ -11,7 +11,7 @@ public class Constants {
     public final String API_URL_BASE = "http://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&api_key=" + API_KEY;
 
     public static String getMovieImageLink(Movie m) {
-
+        if(m.imageLink == null) return null;
         return BASE_IMAGE_URL + m.imageLink;
     }
 }
