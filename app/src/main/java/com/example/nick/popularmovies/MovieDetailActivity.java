@@ -3,7 +3,6 @@ package com.example.nick.popularmovies;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
@@ -22,8 +21,6 @@ import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
 
 
 public class MovieDetailActivity extends AppCompatActivity {
@@ -32,6 +29,9 @@ public class MovieDetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_detail);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setIcon(R.mipmap.ic_launcher);
+
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.activity_movie_detail, new MovieDetailFragment())
@@ -98,7 +98,7 @@ public class MovieDetailActivity extends AppCompatActivity {
                     ((RatingBar) rootView.findViewById(R.id.rating_bar)).setRating(m.userRating.floatValue());
                     ImageView backgroundMovieImage = (ImageView) rootView.findViewById(R.id.movie_image);
                     Picasso.with(getActivity())
-                            .load(Constants.getMovieImageLink(m))
+                            .load(UrlHelper.getMoviePosterLink(m))
                             .into(backgroundMovieImage);
 
                 } catch (ParseException e) {
