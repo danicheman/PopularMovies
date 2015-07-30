@@ -56,11 +56,11 @@ public class MovieAdapter extends ArrayAdapter<Movie>{
         Movie m = movies.get(position);
         //.placeholder(R.raw.place_holder)
         //.error(R.raw.big_problem)
-        String movieImageLink = Constants.getMovieImageLink(m);
+        String movieImageLink = UrlHelper.getMovieImageLink(m);
 
         if(movieImageLink != null ) {
             Picasso.with(getContext())
-                    .load(Constants.getMovieImageLink(m))
+                    .load(UrlHelper.getMovieImageLink(m))
                     .placeholder(R.drawable.default_movie_image)
                     .error(R.drawable.noposter)
                     .into(moviePosterView);
