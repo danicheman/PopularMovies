@@ -50,7 +50,7 @@ public class MoviesFragment extends Fragment {
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         //get sort order or default_movie_image value
-        String sortOrder = prefs.getString("sort_order", "invalid one");
+        String sortOrder = prefs.getString("sort_order", getResources().getStringArray(R.array.sort_order_option_values)[0]);
         Log.v(LOG_TAG, "Sort order in movie fragment" +sortOrder);
         moviesTask.execute(sortOrder);
     }
