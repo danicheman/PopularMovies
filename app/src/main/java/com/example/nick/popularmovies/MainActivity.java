@@ -15,9 +15,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-/**
- * Todo: retrieve data from http://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&api_key=b8a4068d1466dca29becff1029e0e0e1
- */
 public class MainActivity extends AppCompatActivity {
 
     @Override

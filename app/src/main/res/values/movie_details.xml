@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- strings used in the movie details view -->
 <resources>
     <string name="release_date"><![CDATA[<b>Release Date:</b>]]></string>
     <string name="vote_average"><![CDATA[<b>Vote Average:</b>]]></string>

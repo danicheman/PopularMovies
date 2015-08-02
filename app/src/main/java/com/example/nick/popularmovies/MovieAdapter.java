@@ -28,7 +28,6 @@ public class MovieAdapter extends ArrayAdapter<Movie>{
         super(context, 0, movies);
         this.movies = movies;
         mErrorImage = ResourcesCompat.getDrawable(getContext().getResources(), R.drawable.default_movie_image, null);
-        Log.v(LOG_TAG, "constructing MovieAdapter");
     }
 
     @Override

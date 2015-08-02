@@ -5,7 +5,7 @@ package com.example.nick.popularmovies;
  * todo: change the name of this class!
  */
 public class UrlHelper {
-    public final String API_KEY = "b8a4068d1466dca29becff1029e0e0e1";
+    public static final String API_KEY = null;
     private static final String BASE_IMAGE_URL = "http://image.tmdb.org/t/p/w185";
     private static final String BASE_POSTER_URL = "http://image.tmdb.org/t/p/w500";
     //todo: break this down

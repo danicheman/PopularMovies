@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -46,12 +47,16 @@ public class MoviesFragment extends Fragment {
     }
 
     private void updateMovies() {
+        if(UrlHelper.API_KEY == null) {
+            Toast toast = Toast.makeText(getActivity(), "Please set the API KEY in the URL Helper", Toast.LENGTH_LONG);
+            toast.show();
+            return;
+        }
         FetchMoviesTask moviesTask = new FetchMoviesTask();
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         //get sort order or default_movie_image value
         String sortOrder = prefs.getString("sort_order", getResources().getStringArray(R.array.sort_order_option_values)[0]);
-        Log.v(LOG_TAG, "Sort order in movie fragment" +sortOrder);
         moviesTask.execute(sortOrder);
     }
     @Override
@@ -60,15 +65,9 @@ public class MoviesFragment extends Fragment {
         setHasOptionsMenu(true);
     }
 
-    /*@Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.menu_main, menu);
-    }*/
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        Log.v(LOG_TAG, "Launching view of Fragment");
         mMovieAdapter = new ArrayAdapter<>(
                 getActivity(),
                 R.layout.fragment_movies,
@@ -134,7 +133,7 @@ public class MoviesFragment extends Fragment {
                 movies[i].originalTitle = movieData.getString(TMDB_ORIGINAL_TITLE);
                 movies[i].synopsis = movieData.getString(TMDB_OVERVIEW);
                 movies[i].imageLink = movieData.getString(TMDB_IMAGE_LINK);
-                movies[i].userRating = movieData.getDouble(TMDB_VOTE_AVERAGE) / 2; // it's out of 10
+                movies[i].userRating = movieData.getDouble(TMDB_VOTE_AVERAGE) / 2; // it's out of 10, need it out of 5
                 movies[i].releaseDate = movieData.getString(TMDB_RELEASE_DATE);
             }
 
@@ -160,7 +159,7 @@ public class MoviesFragment extends Fragment {
                 // Construct the URL for the OpenWeatherMap query
                 // Possible parameters are avaiable at OWM's forecast API page, at
                 // http://openweathermap.org/API#forecast
-                URL url = new URL("http://api.themoviedb.org/3/discover/movie?sort_by="+sortOrder+"&api_key=b8a4068d1466dca29becff1029e0e0e1");
+                URL url = new URL("http://api.themoviedb.org/3/discover/movie?sort_by="+sortOrder+"&api_key="+UrlHelper.API_KEY);
 
                 // Create the request to OpenWeatherMap, and open the connection
                 urlConnection = (HttpURLConnection) url.openConnection();
@@ -190,8 +189,8 @@ public class MoviesFragment extends Fragment {
                 }
                 moviesJsonStr = buffer.toString();
             } catch (IOException e) {
-                Log.e("PlaceholderFragment", "Error ", e);
-                // If the code didn't successfully get the weather data, there's no point in attemping
+                Log.e(LOG_TAG, "Error ", e);
+                // If the code didn't successfully get the movie data, there's no point in attemping
                 // to parse it.
                 return null;
             } finally{
@@ -202,14 +201,13 @@ public class MoviesFragment extends Fragment {
                     try {
                         reader.close();
                     } catch (final IOException e) {
-                        Log.e("PlaceholderFragment", "Error closing stream", e);
+                        Log.e(LOG_TAG, "Error closing stream", e);
                     }
                 }
             }
 
             try {
-                Movie[] movieArray = getMovieDataFromJson(moviesJsonStr);
-                return movieArray;
+                return  getMovieDataFromJson(moviesJsonStr);
             } catch (JSONException e) {
                 Log.e(LOG_TAG, e.getMessage(), e);
                 e.printStackTrace();
