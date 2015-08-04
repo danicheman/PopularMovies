@@ -31,9 +31,13 @@ import java.util.Arrays;
 public class MoviesFragment extends Fragment {
 
     final String LOG_TAG = MoviesFragment.class.getSimpleName();
+    public  static final String KEY_MOVIES_LIST = "mMovieList";
     public static final String MOVIE_BUNDLE = "movieBundle";
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+
+    //The adapter to prepare the data for the view
     private ArrayAdapter<Movie> mMovieAdapter;
+    //The array of movies retrieved from the server
+    private ArrayList<Movie> mMovieList;
 
     public MoviesFragment() {
         // Required empty public constructor
@@ -44,6 +48,12 @@ public class MoviesFragment extends Fragment {
     public void onStart() {
         super.onStart();
         updateMovies();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList(KEY_MOVIES_LIST, mMovieList);
     }
 
     private void updateMovies() {
@@ -65,15 +75,18 @@ public class MoviesFragment extends Fragment {
         setHasOptionsMenu(true);
     }
 
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        mMovieAdapter = new ArrayAdapter<>(
-                getActivity(),
-                R.layout.fragment_movies,
-                R.id.movieGridView,
-                new ArrayList<Movie>());
-        mMovieAdapter = new MovieAdapter(getActivity(), new ArrayList<Movie>());
+
+        if (savedInstanceState != null) {
+            mMovieList = savedInstanceState.getParcelableArrayList(KEY_MOVIES_LIST);
+        } else {
+            mMovieList = new ArrayList<Movie>();
+        }
+
+        mMovieAdapter = new MovieAdapter(getActivity(), mMovieList);
 
         View rootView = inflater.inflate(R.layout.fragment_movies, container, false);
 
@@ -98,10 +111,14 @@ public class MoviesFragment extends Fragment {
         @Override
         protected void onPostExecute(Movie[] movies) {
             if(movies != null) {
+                mMovieList = new ArrayList<Movie>(Arrays.<Movie>asList(movies));
                 mMovieAdapter.clear();
-                for (Movie m : movies) {
+                for(Movie m: movies) {
+                    Log.v(LOG_TAG, "got movie: "+ m.title);
                     mMovieAdapter.add(m);
                 }
+                //mMovieAdapter.notifyDataSetChanged();
+                //mMovieAdapter.addAll(mMovieList);
             }
         }
 
@@ -156,12 +173,12 @@ public class MoviesFragment extends Fragment {
             String moviesJsonStr = null;
 
             try {
-                // Construct the URL for the OpenWeatherMap query
-                // Possible parameters are avaiable at OWM's forecast API page, at
-                // http://openweathermap.org/API#forecast
+                // Construct the URL for the themoviedb.org query
+                // Possible parameters are avaiable at TMDB's API page, at
+                // http://docs.themoviedb.apiary.io/#reference/discover/discovermovie
                 URL url = new URL("http://api.themoviedb.org/3/discover/movie?sort_by="+sortOrder+"&api_key="+UrlHelper.API_KEY);
 
-                // Create the request to OpenWeatherMap, and open the connection
+                // Create the request to themoviedb.org, and open the connection
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
                 urlConnection.connect();
@@ -207,7 +224,7 @@ public class MoviesFragment extends Fragment {
             }
 
             try {
-                return  getMovieDataFromJson(moviesJsonStr);
+                return getMovieDataFromJson(moviesJsonStr);
             } catch (JSONException e) {
                 Log.e(LOG_TAG, e.getMessage(), e);
                 e.printStackTrace();

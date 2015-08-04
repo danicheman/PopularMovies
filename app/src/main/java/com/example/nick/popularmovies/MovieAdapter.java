@@ -22,27 +22,20 @@ public class MovieAdapter extends ArrayAdapter<Movie>{
 
     final String LOG_TAG = MoviesFragment.class.getSimpleName();
 
-    private Drawable mErrorImage;
-
     public MovieAdapter(Context context, List<Movie> movies) {
         super(context, 0, movies);
         this.movies = movies;
-        mErrorImage = ResourcesCompat.getDrawable(getContext().getResources(), R.drawable.default_movie_image, null);
     }
 
     @Override
     public Movie getItem(int position) {
         return movies.get(position);
     }
-    //R.drawable.movies
-    //185x278
-    //
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
         ImageView moviePosterView;
-
-
 
         if (convertView == null) {
             moviePosterView = new ImageView(getContext());
@@ -53,8 +46,6 @@ public class MovieAdapter extends ArrayAdapter<Movie>{
         }
 
         Movie m = movies.get(position);
-        //.placeholder(R.raw.place_holder)
-        //.error(R.raw.big_problem)
         String movieImageLink = UrlHelper.getMovieImageLink(m);
 
         if(movieImageLink != null ) {

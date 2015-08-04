@@ -77,7 +77,7 @@ public class MovieDetailActivity extends AppCompatActivity {
             // The detail Activity called via intent.  Inspect the intent for movie data.
             Intent intent = getActivity().getIntent();
             if (intent != null && intent.hasExtra(MoviesFragment.MOVIE_BUNDLE)) {
-                Movie m = (Movie) intent.getSerializableExtra(MoviesFragment.MOVIE_BUNDLE);
+                Movie m = (Movie) intent.getParcelableExtra(MoviesFragment.MOVIE_BUNDLE);
 
                 Resources res = getResources();
                 DecimalFormat df = new DecimalFormat("##.#");

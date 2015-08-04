@@ -3,88 +3,85 @@
     android:layout_height="match_parent"
     tools:context="com.example.nick.popularmovies.MovieDetailFragment"
     android:id="@+id/detail">
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/movie_image"
+        android:adjustViewBounds="true"
+        android:scaleType="centerCrop"
+        android:tint="#89000000" />
     <ScrollView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content">
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
+            <TextView
+                android:layout_marginTop="@dimen/movie_detail_vertical_margin"
+                android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                android:layout_marginRight="@dimen/activity_horizontal_margin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="Movie Title"
+                android:textColor="@android:color/white"
+                android:id="@+id/movie_title"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true" />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                android:layout_marginRight="@dimen/activity_horizontal_margin"
+                android:textColor="@android:color/white"
+                android:layout_marginTop="@dimen/movie_detail_vertical_margin"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="Release Date: Tuesday, January 5th, 1974"
+                android:id="@+id/release_date"
+                android:layout_below="@+id/movie_title"
+                 />
 
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/movie_image"
-            android:adjustViewBounds="true"
-            android:scaleType="centerCrop"
-            android:tint="#89000000" />
+            <TextView
+                android:layout_marginTop="@dimen/movie_detail_vertical_margin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                android:layout_marginRight="@dimen/activity_horizontal_margin"
+                android:textColor="@android:color/white"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="Synopsis: This is where the movie description will go.  There will probably be two or three sentences about it."
+                android:id="@+id/synopsis"
+                android:layout_below="@+id/release_date"
+                />
 
-        <TextView
-            android:layout_marginTop="@dimen/movie_detail_vertical_margin"
-            android:layout_marginLeft="@dimen/activity_horizontal_margin"
-            android:layout_marginRight="@dimen/activity_horizontal_margin"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="Movie Title"
-            android:textColor="@android:color/white"
-            android:id="@+id/movie_title"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true" />
+            <RatingBar
+                android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                android:layout_marginRight="@dimen/activity_horizontal_margin"
+                android:layout_marginTop="@dimen/movie_detail_vertical_margin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/rating_bar"
+                android:isIndicator="true"
+                android:layout_below="@+id/synopsis"
+                android:progressTint="@android:color/white"
+                android:rating="2.5"
+                android:layout_centerVertical="true"
+                android:layout_centerHorizontal="true"
+                android:progressBackgroundTint="#ff828282"
+                android:secondaryProgressTint="#ff828282"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/activity_horizontal_margin"
-            android:layout_marginRight="@dimen/activity_horizontal_margin"
-            android:textColor="@android:color/white"
-            android:layout_marginTop="@dimen/movie_detail_vertical_margin"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Release Date: Tuesday, January 5th, 1974"
-            android:id="@+id/release_date"
-            android:layout_below="@+id/movie_title"
-             />
-
-        <TextView
-            android:layout_marginTop="@dimen/movie_detail_vertical_margin"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/activity_horizontal_margin"
-            android:layout_marginRight="@dimen/activity_horizontal_margin"
-            android:textColor="@android:color/white"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Synopsis: This is where the movie description will go.  There will probably be two or three sentences about it."
-            android:id="@+id/synopsis"
-            android:layout_below="@+id/release_date"
-            />
-
-        <RatingBar
-            android:layout_marginLeft="@dimen/activity_horizontal_margin"
-            android:layout_marginRight="@dimen/activity_horizontal_margin"
-            android:layout_marginTop="@dimen/movie_detail_vertical_margin"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/rating_bar"
-            android:isIndicator="true"
-            android:layout_below="@+id/synopsis"
-            android:progressTint="@android:color/white"
-            android:rating="2.5"
-            android:layout_centerVertical="true"
-            android:layout_centerHorizontal="true"
-            android:progressBackgroundTint="#ff828282"
-            android:secondaryProgressTint="#ff828282"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="3.8 out of 5"
-            android:id="@+id/rating_data"
-            android:layout_marginLeft="@dimen/activity_horizontal_margin"
-            android:layout_marginRight="@dimen/activity_horizontal_margin"
-            android:textColor="@android:color/white"
-            android:layout_below="@+id/rating_bar"
-            android:layout_centerHorizontal="true" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="3.8 out of 5"
+                android:id="@+id/rating_data"
+                android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                android:layout_marginRight="@dimen/activity_horizontal_margin"
+                android:textColor="@android:color/white"
+                android:layout_below="@+id/rating_bar"
+                android:layout_centerHorizontal="true" />
         </RelativeLayout>
     </ScrollView>
 </RelativeLayout>
