@@ -1,19 +1,24 @@
 package com.example.nick.popularmovies;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.GridView;
-import android.widget.Toast;
+import android.widget.ImageView;
+import android.widget.RatingBar;
+import android.widget.TextView;
+
+import com.example.nick.popularmovies.Movie;
+import com.example.nick.popularmovies.MoviesFragment;
+import com.example.nick.popularmovies.R;
+import com.example.nick.popularmovies.UrlHelper;
+import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -25,105 +30,79 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 
-public class MoviesFragment extends Fragment {
+public class MovieDetailFragment extends Fragment {
 
-    final String LOG_TAG = MoviesFragment.class.getSimpleName();
-    public  static final String KEY_MOVIES_LIST = "mMovieList";
-    public static final String MOVIE_BUNDLE = "movieBundle";
-
-    //The adapter to prepare the data for the view
-    private ArrayAdapter<Movie> mMovieAdapter;
-    //The array of movies retrieved from the server
-    private ArrayList<Movie> mMovieList;
-
-    public MoviesFragment() {
-        // Required empty public constructor
-
+    public MovieDetailFragment() {
     }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        updateMovies();
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putParcelableArrayList(KEY_MOVIES_LIST, mMovieList);
-    }
-
-    private void updateMovies() {
-        if(UrlHelper.API_KEY == null) {
-            Toast toast = Toast.makeText(getActivity(), "Please set the API KEY in the URL Helper", Toast.LENGTH_LONG);
-            toast.show();
-            return;
-        }
-        FetchMoviesTask moviesTask = new FetchMoviesTask();
-
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        //get sort order or default_movie_image value
-        String sortOrder = prefs.getString("sort_order", getResources().getStringArray(R.array.sort_order_option_values)[0]);
-        moviesTask.execute(sortOrder);
-    }
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
-    }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        if (savedInstanceState != null) {
-            mMovieList = savedInstanceState.getParcelableArrayList(KEY_MOVIES_LIST);
-        } else {
-            mMovieList = new ArrayList<Movie>();
+        View rootView = inflater.inflate(R.layout.fragment_movie_detail, container, false);
+
+        // The detail Activity called via intent.  Inspect the intent for movie data.
+        Intent intent = getActivity().getIntent();
+        if (intent != null && intent.hasExtra(MoviesFragment.MOVIE_BUNDLE)) {
+            Movie m = (Movie) intent.getParcelableExtra(MoviesFragment.MOVIE_BUNDLE);
+
+            Resources res = getResources();
+            DecimalFormat df = new DecimalFormat("##.#");
+
+
+
+            SimpleDateFormat inputDate = new SimpleDateFormat("yyyy-MM-dd");
+            SimpleDateFormat outputDate = new SimpleDateFormat("EEEE, MMMM dd, yyyy");
+
+            try {
+                Date date = inputDate.parse(m.releaseDate);
+                String formattedReleaseDate = outputDate.format(date);
+
+                ((TextView) rootView.findViewById(R.id.movie_title)).setText(m.title);
+                ((TextView) rootView.findViewById(R.id.synopsis)).setText(Html.fromHtml(res.getText(R.string.synopsis) + " " + m.synopsis));
+                ((TextView) rootView.findViewById(R.id.release_date)).setText(Html.fromHtml(res.getText(R.string.release_date) + " " + formattedReleaseDate));
+                ((TextView) rootView.findViewById(R.id.rating_data)).setText(Html.fromHtml(res.getText(R.string.vote_average) + " " + df.format(m.userRating)));
+                ((RatingBar) rootView.findViewById(R.id.rating_bar)).setRating(m.userRating.floatValue());
+                ImageView backgroundMovieImage = (ImageView) rootView.findViewById(R.id.movie_image);
+                Picasso.with(getActivity())
+                        .load(UrlHelper.getMoviePosterLink(m))
+                        .into(backgroundMovieImage);
+
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
         }
 
-        mMovieAdapter = new MovieAdapter(getActivity(), mMovieList);
-
-        View rootView = inflater.inflate(R.layout.fragment_movies, container, false);
-
-        GridView gridView = (GridView) rootView.findViewById(R.id.movieGridView);
-        gridView.setAdapter(mMovieAdapter);
-        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Movie clickedMovie = mMovieAdapter.getItem(position);
-                Intent intent = new Intent(getActivity(), MovieDetailActivity.class)
-                        .putExtra(MOVIE_BUNDLE, clickedMovie);
-                startActivity(intent);
-            }
-        });
-
-        // Inflate the layout for this fragment
         return rootView;
     }
 
     /**
      *
      */
-    public class FetchMoviesTask extends AsyncTask<String, Void, Movie[]> {
+    public class FetchMovieDetailsTask extends AsyncTask<String, Void, Movie[]> {
 
         @Override
         protected void onPostExecute(Movie[] movies) {
             if(movies != null) {
                 mMovieList = new ArrayList<Movie>(Arrays.<Movie>asList(movies));
                 mMovieAdapter.clear();
-                /*for(Movie m: movies) {
+                for(Movie m: movies) {
+                    Log.v(LOG_TAG, "got movie: " + m.title);
                     mMovieAdapter.add(m);
-                }*/
-                mMovieAdapter.addAll(mMovieList);
+                }
+                //mMovieAdapter.notifyDataSetChanged();
+                //mMovieAdapter.addAll(mMovieList);
             }
         }
 
-        final String LOG_TAG = FetchMoviesTask.class.getSimpleName();
+        final String LOG_TAG = FetchMovieDetailsTask.class.getSimpleName();
         final String TMDB_RESULTS = "results";
         final String TMDB_TITLE = "title";
         final String TMDB_ORIGINAL_TITLE = "original_title";
@@ -233,6 +212,4 @@ public class MoviesFragment extends Fragment {
             return null;
         }
     }
-
-
 }

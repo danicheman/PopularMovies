@@ -11,6 +11,7 @@ import java.io.Serializable;
  */
 public class Movie implements Parcelable{
 
+    private static final String KEY_ID = "id";
     private static final String KEY_TITLE = "title";
     private static final String KEY_RELEASE_DATE = "releaseDate";
     private static final String KEY_IMAGE_LINK = "imageLink";
@@ -18,6 +19,7 @@ public class Movie implements Parcelable{
     private static final String KEY_USER_RATING = "userRating";
     private static final String KEY_ORIGINAL_TITLE = "originalTitle";
 
+    public int    id;
     public String title;
     public String originalTitle;
     public String releaseDate;
@@ -35,13 +37,13 @@ public class Movie implements Parcelable{
 
         //create the bundle and insert the key/value pairs into it
         Bundle bundle = new Bundle();
+        bundle.putInt(KEY_ID, id);
         bundle.putString(KEY_TITLE, title);
         bundle.putString(KEY_RELEASE_DATE, releaseDate);
         bundle.putString(KEY_IMAGE_LINK, imageLink);
         bundle.putString(KEY_SYNOPSIS, synopsis);
         bundle.putString(KEY_ORIGINAL_TITLE, originalTitle);
         bundle.putDouble(KEY_USER_RATING, userRating);
-
 
         //write the key value pairs to the parcel
         dest.writeBundle(bundle);
@@ -54,6 +56,7 @@ public class Movie implements Parcelable{
 
             Movie movie = new Movie();
 
+            movie.id            = bundle.getInt(KEY_ID, null);
             movie.title         = bundle.getString(KEY_TITLE, null);
             movie.releaseDate   = bundle.getString(KEY_RELEASE_DATE, null);
             movie.imageLink     = bundle.getString(KEY_IMAGE_LINK, null);
