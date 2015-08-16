@@ -1,7 +1,9 @@
 package com.example.nick.popularmovies;
 
+import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.os.Build;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -39,6 +41,20 @@ public class MovieDetailActivity extends AppCompatActivity {
         }
     }
 
+
+    /**
+     * When you press back button on the action bar in the details activity,
+     * you’ll see the state of the main activity is lost (if you had scrolled
+     * in the list somewhere it just reloads). Here’s a neat trick to prevent
+     * that from happening:
+     */
+    @Override @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    public Intent getParentActivityIntent() {
+        // add the clear top flag - which checks if the parent (main)
+        // activity is already running and avoids recreating it
+        return super.getParentActivityIntent()
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
