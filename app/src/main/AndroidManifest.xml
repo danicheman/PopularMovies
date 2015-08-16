@@ -3,6 +3,9 @@
     package="com.example.nick.popularmovies" >
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- To check if there is a network connection before starting Async Task -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
     <application
         android:allowBackup="true"
