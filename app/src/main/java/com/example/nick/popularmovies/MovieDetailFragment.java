@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.ParseException;
@@ -143,20 +144,42 @@ public class MovieDetailFragment extends Fragment {
             if (params.length == 0) {
                 return null;
             }
+
+            //todo: get the movie id here instead of sortorder
             String sortOrder = params[0];
+
+
+
+
+            try {
+                String urlString = "http://api.themoviedb.org/3/discover/movie?sort_by=" + sortOrder + "&api_key=" + UrlHelper.API_KEY;
+                URL url = new URL(urlString);
+
+                // Will contain the raw JSON response as a string.
+                String moviesJsonStr = getUrlAsString(url);
+                return getMovieDataFromJson(moviesJsonStr);
+            } catch(MalformedURLException e) {
+                Log.e(LOG_TAG, "Malformed URL" + e.getMessage());
+            } catch(JSONException e) {
+                Log.e(LOG_TAG, e.getMessage(), e);
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+
+        private String getUrlAsString(URL url) {
+
             // These two need to be declared outside the try/catch
             // so that they can be closed in the finally block.
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
 
-            // Will contain the raw JSON response as a string.
-            String moviesJsonStr = null;
-
             try {
                 // Construct the URL for the themoviedb.org query
                 // Possible parameters are avaiable at TMDB's API page, at
                 // http://docs.themoviedb.apiary.io/#reference/discover/discovermovie
-                URL url = new URL("http://api.themoviedb.org/3/discover/movie?sort_by="+sortOrder+"&api_key="+UrlHelper.API_KEY);
+
 
                 // Create the request to themoviedb.org, and open the connection
                 urlConnection = (HttpURLConnection) url.openConnection();
@@ -184,7 +207,7 @@ public class MovieDetailFragment extends Fragment {
                     // Stream was empty.  No point in parsing.
                     return null;
                 }
-                moviesJsonStr = buffer.toString();
+                return buffer.toString();
             } catch (IOException e) {
                 Log.e(LOG_TAG, "Error ", e);
                 // If the code didn't successfully get the movie data, there's no point in attemping
@@ -202,14 +225,6 @@ public class MovieDetailFragment extends Fragment {
                     }
                 }
             }
-
-            try {
-                return getMovieDataFromJson(moviesJsonStr);
-            } catch (JSONException e) {
-                Log.e(LOG_TAG, e.getMessage(), e);
-                e.printStackTrace();
-            }
-            return null;
         }
     }
 }

@@ -17,18 +17,46 @@ import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String DETAILFRAGMENT_TAG = "DFTAG";
+    private boolean mTwoPane;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setIcon(R.mipmap.ic_launcher);
-        if (savedInstanceState == null) {
 
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new MoviesFragment())
-                    .commit();
+        if(findViewById(R.id.movie_detail_container) != null) {
+            /* The detail container view will be present only in the large-screen
+            layouts res/layout-sw600dp). If this view is present, the the activity
+            should be in two-pane mode. */
+            mTwoPane = true;
+            if (savedInstanceState == null) {
+
+                /* Fill out the right-hand-side of the two-pane view; populate the
+                   detail container. */
+                getSupportFragmentManager().beginTransaction()
+                        .add(R.id.movie_detail_container, new MovieDetailFragment(), DETAILFRAGMENT_TAG)
+                        .commit();
+            }
+        } else {
+            mTwoPane = false;
+
         }
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        //todo: get selected movie id
+
+        //todo: find fragment by tag
+
+        //todo: on movie changed void method
+
     }
 
     @Override
@@ -55,4 +83,6 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+
 }

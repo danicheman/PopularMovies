@@ -56,7 +56,7 @@ public class Movie implements Parcelable{
 
             Movie movie = new Movie();
 
-            movie.id            = bundle.getInt(KEY_ID, null);
+            movie.id            = bundle.getInt(KEY_ID, 0);
             movie.title         = bundle.getString(KEY_TITLE, null);
             movie.releaseDate   = bundle.getString(KEY_RELEASE_DATE, null);
             movie.imageLink     = bundle.getString(KEY_IMAGE_LINK, null);

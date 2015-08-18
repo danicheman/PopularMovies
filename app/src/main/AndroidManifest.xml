@@ -38,7 +38,7 @@
 
         <provider
             android:name=".data.MovieProvider"
-            android:authorities="com.example.nick.popularmovies/movies"
+            android:authorities="com.example.nick.popularmovies"
             android:enabled="true"
             android:exported="true" >
         </provider>

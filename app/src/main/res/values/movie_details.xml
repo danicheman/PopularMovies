@@ -4,4 +4,7 @@
     <string name="release_date"><![CDATA[<b>Release Date:</b>]]></string>
     <string name="vote_average"><![CDATA[<b>Vote Average:</b>]]></string>
     <string name="synopsis"><![CDATA[<b>Synopsis:</b>]]></string>
+    <string name="trailers">Trailers</string>
+    <string name="reviews">Reviews</string>
+    <string name="related">Related Movies</string>
 </resources>
