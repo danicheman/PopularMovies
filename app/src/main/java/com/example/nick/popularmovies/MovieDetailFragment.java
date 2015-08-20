@@ -87,7 +87,7 @@ public class MovieDetailFragment extends Fragment {
     /**
      *
      */
-    public class FetchMovieDetailsTask extends AsyncTask<String, Void, Movie[]> {
+    /*public class FetchMovieDetailsTask extends AsyncTask<String, Void, Movie[]> {
 
         @Override
         protected void onPostExecute(Movie[] movies) {
@@ -226,5 +226,5 @@ public class MovieDetailFragment extends Fragment {
                 }
             }
         }
-    }
+    }*/
 }

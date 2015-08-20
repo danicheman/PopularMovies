@@ -5,6 +5,8 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.example.nick.popularmovies.Movie;
+
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -55,10 +57,11 @@ public class TestDb extends AndroidTestCase {
         // Build a HashSet of all of the column names we want to look for
         final HashSet<String> movieColumnHashSet = new HashSet<String>();
         movieColumnHashSet.add(MovieContract.MovieEntry._ID);
-        movieColumnHashSet.add(MovieContract.MovieEntry.COLUMN_CITY_NAME);
-        movieColumnHashSet.add(MovieContract.MovieEntry.COLUMN_COORD_LAT);
-        movieColumnHashSet.add(MovieContract.MovieEntry.COLUMN_COORD_LONG);
-        movieColumnHashSet.add(MovieContract.MovieEntry.COLUMN_LOCATION_SETTING);
+        movieColumnHashSet.add(MovieContract.MovieEntry.COLUMN_TITLE);
+        movieColumnHashSet.add(MovieContract.MovieEntry.COLUMN_SYNOPSIS);
+        movieColumnHashSet.add(MovieContract.MovieEntry.COLUMN_RATING);
+        movieColumnHashSet.add(MovieContract.MovieEntry.COLUMN_IMAGE_LINK);
+        movieColumnHashSet.add(MovieContract.MovieEntry.COLUMN_IS_FAVORITE);
 
         int columnNameIndex = c.getColumnIndex("name");
         do {
@@ -73,12 +76,130 @@ public class TestDb extends AndroidTestCase {
         db.close();
     }
 
-    public void testGenreTable() {
+    public long insertGenre() {
+        // First step: Get reference to writable database
+        // If there's an error in those massive SQL table creation Strings,
+        // errors will be thrown here when you try to get a writable database.
+        MovieDbHelper dbHelper = new MovieDbHelper(mContext);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        // Second Step: Create ContentValues of what you want to insert
+        // (you can use the createNorthPoleLocationValues if you wish)
+        ContentValues testValues = TestUtilities.createGenreValues();
+
+        // Third Step: Insert ContentValues into database and get a row ID back
+        long genreRowId;
+        genreRowId = db.insert(MovieContract.GenreEntry.TABLE_NAME, null, testValues);
+
+        // Verify we got a row back.
+        assertTrue(genreRowId != -1);
+
+        // Data's inserted.  IN THEORY.  Now pull some out to stare at it and verify it made
+        // the round trip.
+
+        // Fourth Step: Query the database and receive a Cursor back
+        // A cursor is your primary interface to the query results.
+        Cursor cursor = db.query(
+                MovieContract.GenreEntry.TABLE_NAME,  // Table to Query
+                null, // all columns
+                null, // Columns for the "where" clause
+                null, // Values for the "where" clause
+                null, // columns to group by
+                null, // columns to filter by row groups
+                null // sort order
+        );
+
+        // Move the cursor to a valid database row and check to see if we got any records back
+        // from the query
+        assertTrue( "Error: No Records returned from location query", cursor.moveToFirst() );
+
+        // Fifth Step: Validate data in resulting Cursor with the original ContentValues
+        // (you can use the validateCurrentRecord function in TestUtilities to validate the
+        // query if you like)
+        TestUtilities.validateCurrentRecord("Error: Location Query Validation Failed",
+                cursor, testValues);
+
+        // Move the cursor to demonstrate that there is only one record in the database
+        assertFalse( "Error: More than one record returned from location query",
+                cursor.moveToNext() );
+
+        // Sixth Step: Close Cursor and Database
+        cursor.close();
+        db.close();
+        return genreRowId;
 
     }
+    public void testMovieTable() {insertMovie();}
 
-    String insertGenre() {
-        return "action";
+    public void testGenreTable() {insertGenre();}
+
+    public void testMovieGenreTable() {
+        long genreId = insertGenre();
+        long movieId = insertMovie();
+
+        MovieDbHelper dbHelper = new MovieDbHelper(mContext);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        ContentValues testValues = new ContentValues();
+
+        testValues.put(MovieContract.MovieGenresEntry.COLUMN_MOVIE_ID, movieId);
+        testValues.put(MovieContract.MovieGenresEntry.COLUMN_GENRE_ID, genreId);
+
+        long insertResult = db.insert(MovieContract.MovieGenresEntry.TABLE_NAME, null, testValues);
+        assertTrue("Error, movie genre table insert failed", insertResult != -1);
+    }
+
+    public long insertMovie() {
+        // First step: Get reference to writable database
+        // If there's an error in those massive SQL table creation Strings,
+        // errors will be thrown here when you try to get a writable database.
+        MovieDbHelper dbHelper = new MovieDbHelper(mContext);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        // Second Step: Create ContentValues of what you want to insert
+        // (you can use the createNorthPoleLocationValues if you wish)
+        ContentValues testValues = TestUtilities.createMovieValues();
+
+        // Third Step: Insert ContentValues into database and get a row ID back
+        long movieRowId;
+        movieRowId = db.insert(MovieContract.MovieEntry.TABLE_NAME, null, testValues);
+
+        // Verify we got a row back.
+        assertTrue(movieRowId != -1);
+
+        // Data's inserted.  IN THEORY.  Now pull some out to stare at it and verify it made
+        // the round trip.
+
+        // Fourth Step: Query the database and receive a Cursor back
+        // A cursor is your primary interface to the query results.
+        Cursor cursor = db.query(
+                MovieContract.MovieEntry.TABLE_NAME,  // Table to Query
+                null, // all columns
+                null, // Columns for the "where" clause
+                null, // Values for the "where" clause
+                null, // columns to group by
+                null, // columns to filter by row groups
+                null // sort order
+        );
+
+        // Move the cursor to a valid database row and check to see if we got any records back
+        // from the query
+        assertTrue( "Error: No Records returned from location query", cursor.moveToFirst() );
+
+        // Fifth Step: Validate data in resulting Cursor with the original ContentValues
+        // (you can use the validateCurrentRecord function in TestUtilities to validate the
+        // query if you like)
+        TestUtilities.validateCurrentRecord("Error: Location Query Validation Failed",
+                cursor, testValues);
+
+        // Move the cursor to demonstrate that there is only one record in the database
+        assertFalse( "Error: More than one record returned from location query",
+                cursor.moveToNext() );
+
+        // Sixth Step: Close Cursor and Database
+        cursor.close();
+        db.close();
+        return movieRowId;
     }
 
 

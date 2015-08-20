@@ -54,6 +54,7 @@ public class TestUtilities extends AndroidTestCase {
 
     }
 
+    //To be called by test provider
     static long insertGenreValues(Context context) {
         MovieDbHelper dbHelper = new MovieDbHelper(context);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
