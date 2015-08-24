@@ -4,10 +4,10 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.io.Serializable;
-
 /**
  * Created by NICK on 7/15/2015.
+ *
+ * DONT USE THIS ANYMORE, USE A CURSOR, ALWAYS FETCH FROM DB.
  */
 public class Movie implements Parcelable{
 
@@ -26,29 +26,6 @@ public class Movie implements Parcelable{
     public String imageLink;
     public String synopsis; //overview
     public Double userRating; //vote_average
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-
-        //create the bundle and insert the key/value pairs into it
-        Bundle bundle = new Bundle();
-        bundle.putInt(KEY_ID, id);
-        bundle.putString(KEY_TITLE, title);
-        bundle.putString(KEY_RELEASE_DATE, releaseDate);
-        bundle.putString(KEY_IMAGE_LINK, imageLink);
-        bundle.putString(KEY_SYNOPSIS, synopsis);
-        bundle.putString(KEY_ORIGINAL_TITLE, originalTitle);
-        bundle.putDouble(KEY_USER_RATING, userRating);
-
-        //write the key value pairs to the parcel
-        dest.writeBundle(bundle);
-    }
-
     public static final Parcelable.Creator<Movie> CREATOR = new Creator<Movie>() {
         @Override
         public Movie createFromParcel(Parcel source) {
@@ -72,4 +49,26 @@ public class Movie implements Parcelable{
             return new Movie[0];
         }
     };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+
+        //create the bundle and insert the key/value pairs into it
+        Bundle bundle = new Bundle();
+        bundle.putInt(KEY_ID, id);
+        bundle.putString(KEY_TITLE, title);
+        bundle.putString(KEY_RELEASE_DATE, releaseDate);
+        bundle.putString(KEY_IMAGE_LINK, imageLink);
+        bundle.putString(KEY_SYNOPSIS, synopsis);
+        bundle.putString(KEY_ORIGINAL_TITLE, originalTitle);
+        bundle.putDouble(KEY_USER_RATING, userRating);
+
+        //write the key value pairs to the parcel
+        dest.writeBundle(bundle);
+    }
 }

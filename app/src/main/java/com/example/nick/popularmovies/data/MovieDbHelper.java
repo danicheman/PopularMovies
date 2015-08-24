@@ -4,15 +4,19 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.example.nick.popularmovies.data.MovieContract.*;
+import com.example.nick.popularmovies.data.MovieContract.GenreEntry;
+import com.example.nick.popularmovies.data.MovieContract.MovieEntry;
+import com.example.nick.popularmovies.data.MovieContract.MovieGenresEntry;
+import com.example.nick.popularmovies.data.MovieContract.MovieReviewsEntry;
+import com.example.nick.popularmovies.data.MovieContract.MovieTrailersEntry;
 
 /**
  * Created by NICK on 8/10/2015.
  */
 public class MovieDbHelper extends SQLiteOpenHelper {
 
-    private static final int DATABASE_VERSION = 1;
     static final String DATABASE_NAME = "movies.db";
+    private static final int DATABASE_VERSION = 1;
 
     public MovieDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -52,6 +56,34 @@ public class MovieDbHelper extends SQLiteOpenHelper {
 
         db.execSQL(SQL_CREATE_MOVIE_GENRES_TABLE);
 
+        //trailer table many to one with movies
+        final String SQL_CREATE_MOVIE_TRAILERS_TABLE = "CREATE TABLE " +
+                MovieTrailersEntry.TABLE_NAME + " (" +
+                MovieTrailersEntry.COLUMN_MOVIE_ID + " INTEGER NOT NULL, " +
+                MovieTrailersEntry.COLUMN_KEY + " TEXT UNIQUE NOT NULL, " +
+                MovieTrailersEntry.COLUMN_NAME + " TEXT NOT NULL, " +
+                " FOREIGN KEY (" + MovieTrailersEntry.COLUMN_MOVIE_ID + ") REFERENCES " +
+                MovieEntry.TABLE_NAME + " (" + MovieEntry._ID + "), " +
+                " UNIQUE (" + MovieTrailersEntry.COLUMN_MOVIE_ID + ", " +
+                MovieTrailersEntry.COLUMN_KEY + ") ON CONFLICT REPLACE);";
+
+        db.execSQL(SQL_CREATE_MOVIE_TRAILERS_TABLE);
+
+        //review table, many to one with movies
+        final String SQL_CREATE_MOVIE_REVIEWS_TABLE = "CREATE TABLE " +
+                MovieReviewsEntry.TABLE_NAME + " (" +
+                MovieReviewsEntry.COLUMN_MOVIE_ID + " INTEGER NOT NULL, " +
+                MovieReviewsEntry.COLUMN_REVIEW_ID + " TEXT UNIQUE NOT NULL, " +
+                MovieReviewsEntry.COLUMN_REVIEW + " TEXT NOT NULL, " +
+                MovieReviewsEntry.COLUMN_AUTHOR + " TEXT NOT NULL, " +
+                MovieReviewsEntry.COLUMN_REVIEW_LINK + " TEXT NOT NULL, " +
+                " FOREIGN KEY (" + MovieReviewsEntry.COLUMN_MOVIE_ID + ") REFERENCES " +
+                MovieEntry.TABLE_NAME + " (" + MovieEntry._ID + "), " +
+                " UNIQUE (" + MovieReviewsEntry.COLUMN_MOVIE_ID + ", " +
+                MovieReviewsEntry.COLUMN_REVIEW_ID + ") ON CONFLICT REPLACE);";
+
+        db.execSQL(SQL_CREATE_MOVIE_REVIEWS_TABLE);
+
     }
 
     @Override
@@ -65,6 +97,8 @@ public class MovieDbHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + MovieEntry.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + GenreEntry.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + MovieGenresEntry.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + MovieReviewsEntry.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + MovieTrailersEntry.TABLE_NAME);
         onCreate(db);
     }
 }
