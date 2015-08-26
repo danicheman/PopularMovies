@@ -1,12 +1,10 @@
 package com.example.nick.popularmovies;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
-import android.support.v4.content.res.ResourcesCompat;
-import android.util.Log;
+import android.database.Cursor;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.widget.CursorAdapter;
 import android.widget.ImageView;
 
 import com.squareup.picasso.Picasso;
@@ -17,8 +15,7 @@ import java.util.List;
  * Created by NICK on 7/15/2015.
  * Adapt the movie data to the grid view
  */
-public class MovieAdapter extends ArrayAdapter<Movie>{
-    private List<Movie> movies;
+public class MovieAdapter extends CursorAdapter {
 
     final String LOG_TAG = MoviesFragment.class.getSimpleName();
 
@@ -58,6 +55,16 @@ public class MovieAdapter extends ArrayAdapter<Movie>{
             moviePosterView.setImageResource(R.drawable.noposter);
         }
         return moviePosterView;
+    }
+
+    @Override
+    public View newView(Context context, Cursor cursor, ViewGroup parent) {
+        return null;
+    }
+
+    @Override
+    public void bindView(View view, Context context, Cursor cursor) {
+
     }
 
 

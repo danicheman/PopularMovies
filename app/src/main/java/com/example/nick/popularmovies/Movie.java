@@ -7,7 +7,8 @@ import android.os.Parcelable;
 /**
  * Created by NICK on 7/15/2015.
  *
- * DONT USE THIS ANYMORE, USE A CURSOR, ALWAYS FETCH FROM DB.
+ * Will need to use a movie object because we cannot simply return a database result.
+ * Details page needs to load two types of data, trailers and reviews.
  */
 public class Movie implements Parcelable{
 

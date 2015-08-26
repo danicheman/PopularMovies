@@ -1,6 +1,7 @@
 package com.example.nick.popularmovies.data;
 
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
@@ -28,6 +29,7 @@ public class MovieContract {
         public static final Uri CONTENT_URI =
                 BASE_CONTENT_URI.buildUpon().appendPath(PATH_MOVIE).build();
 
+
         public static final String CONTENT_TYPE =
                 ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_MOVIE;
         public static final String CONTENT_ITEM_TYPE =
@@ -40,6 +42,9 @@ public class MovieContract {
         public static final String COLUMN_IMAGE_LINK    = "image_link";
         public static final String COLUMN_IS_FAVORITE   = "is_favorite";
 
+        public static Uri buildMovieUri(long id) {
+            return ContentUris.withAppendedId(CONTENT_URI, id);
+        }
     }
 
     public static final class MovieGenresEntry {
@@ -87,6 +92,10 @@ public class MovieContract {
         public static final String COLUMN_MOVIE_ID = "movie_id";
         public static final String COLUMN_KEY = "key"; //youtube id
         public static final String COLUMN_NAME = "name"; //video title
+
+        public static Uri buildTrailerUri(long id) {
+            return ContentUris.withAppendedId(CONTENT_URI, id);
+        }
     }
 
     //1 to 1 relationship with movies
@@ -106,6 +115,11 @@ public class MovieContract {
         public static final String COLUMN_REVIEW = "content"; //"content" - in json
         public static final String COLUMN_REVIEW_LINK = "link";
         public static final String COLUMN_AUTHOR = "author";
+
+        public static Uri buildReviewUri(long id) {
+            return ContentUris.withAppendedId(CONTENT_URI, id);
+        }
+
     }
 
 }

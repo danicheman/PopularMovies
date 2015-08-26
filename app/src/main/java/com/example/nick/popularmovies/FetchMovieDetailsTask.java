@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.ArrayAdapter;
 
 import com.example.nick.popularmovies.data.MovieContract;
 import com.example.nick.popularmovies.data.MovieContract.MovieReviewsEntry;
@@ -32,7 +33,7 @@ public class FetchMovieDetailsTask extends AsyncTask<String, Void, Movie[]> {
     final String TMDB_RESULTS = "results";
     private final Context mContext;
 
-    public FetchMovieDetailsTask(Context c) {
+    public FetchMovieDetailsTask(Context c, ArrayAdapter) {
         mContext = c;
     }
 
