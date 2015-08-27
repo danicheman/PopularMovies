@@ -2,6 +2,7 @@ package com.example.nick.popularmovies;
 
 import android.content.Intent;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -26,11 +27,15 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class MovieDetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Movie> {
+public class MovieDetailFragment extends Fragment {
     static final String DETAIL_URI = "URI";
     private static final String LOG_TAG = MovieDetailFragment.class.getSimpleName();
     private static final String FORECAST_SHARE_HASHTAG = " #SunshineApp";
-    private static final int DETAIL_LOADER = 0;
+
+    private static final int LOADER_MOVIE_DETAIL    = 0;
+    private static final int LOADER_MOVIE_REVIEW    = 1;
+    private static final int LOADER_MOVIE_TRAILER   = 2;
+
     //projection
     private static final String[] DETAIL_PROJECTION_COLUMNS = {
             MovieEntry.TABLE_NAME + "." + MovieEntry._ID,
@@ -54,20 +59,35 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     public MovieDetailFragment() {
     }
 
-    @Override
-    public Loader<Movie> onCreateLoader(int id, Bundle args) {
-        return null;
-    }
+    private LoaderManager.LoaderCallbacks<Cursor> MovieLoader = new LoaderManager.LoaderCallbacks<Cursor>() {
+        @Override
+        public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+            switch(id) {
+                case LOADER_MOVIE_DETAIL:
+                    CursorLoader
+                    break;
+                case LOADER_MOVIE_REVIEW:
+                    break;
+                case LOADER_MOVIE_TRAILER:
+                    break;
+                default:
 
-    @Override
-    public void onLoadFinished(Loader<Movie> loader, Movie data) {
+            }
+            return null;
+        }
 
-    }
+        @Override
+        public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
 
-    @Override
-    public void onLoaderReset(Loader<Movie> loader) {
+        }
 
-    }
+        @Override
+        public void onLoaderReset(Loader<Cursor> loader) {
+
+        }
+    };
+
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
