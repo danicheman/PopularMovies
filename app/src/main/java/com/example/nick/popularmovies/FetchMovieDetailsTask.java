@@ -21,7 +21,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * todo: fetch genres, trailers and reviews
@@ -30,24 +29,18 @@ import java.util.Arrays;
 public class FetchMovieDetailsTask extends AsyncTask<String, Void, Movie[]> {
 
     final String LOG_TAG = FetchMovieDetailsTask.class.getSimpleName();
+
+    final String TMDB_TRAILERS = "trailers";
+    final String TMDB_TRAILERS_YT = "youtube";
+    final String TMDB_REVIEWS = "reviews";
     final String TMDB_RESULTS = "results";
+
     private final Context mContext;
 
     public FetchMovieDetailsTask(Context c, ArrayAdapter) {
         mContext = c;
     }
 
-    @Override
-    protected void onPostExecute(Movie[] movies) {
-        if (movies != null) {
-            mMovieList = new ArrayList<Movie>(Arrays.<Movie>asList(movies));
-            mMovieAdapter.clear();
-                /*for(Movie m: movies) {
-                    mMovieAdapter.add(m);
-                }*/
-            mMovieAdapter.addAll(mMovieList);
-        }
-    }
     //todo:create constants for the two details queries.
     /*final String TMDB_TITLE = "title";
     final String TMDB_ORIGINAL_TITLE = "original_title";
@@ -59,9 +52,9 @@ public class FetchMovieDetailsTask extends AsyncTask<String, Void, Movie[]> {
     /**
      * Get details from the api and save them to the database
      */
-    private ArrayList<ContentValues> getAndSaveMovieTrailersFromJson(String jsonTrailerData) throws JSONException {
+    private void getAndSaveMovieTrailersFromJson(JSONObject jsonTrailerData) throws JSONException {
 
-        JSONObject trailersJson = new JSONObject(jsonTrailerData);
+        JSONObject trailersJson = new JSONObject(jsonTrailerData.getJSONObject(TMDB_TRAILERS_YT));
 
         //get the movie id
         int movieId = trailersJson.getInt("id");
@@ -83,7 +76,9 @@ public class FetchMovieDetailsTask extends AsyncTask<String, Void, Movie[]> {
             contentValuesArrayList.add(trailerValues);
         }
         if (contentValuesArrayList.size() > 0) {
-            mContext.getContentResolver().bulkInsert(MovieContract.MovieEntry.CONTENT_URI, cvArray);
+            ContentValues[] contentValuesArray = new ContentValues[contentValuesArrayList.size()];
+            contentValuesArrayList.toArray(contentValuesArray);
+            mContext.getContentResolver().bulkInsert(MovieContract.MovieEntry.CONTENT_URI, contentValuesArray);
         }
 
 
@@ -93,7 +88,7 @@ public class FetchMovieDetailsTask extends AsyncTask<String, Void, Movie[]> {
     /**
      * Get details from the api and save them to the database
      */
-    private ArrayList<ContentValues> getAndSaveMovieReviewsFromJson(String jsonTrailerData) throws JSONException {
+    private void getAndSaveMovieReviewsFromJson(JSONObject jsonTrailerData) throws JSONException {
 
         JSONObject trailersJson = new JSONObject(jsonTrailerData);
 
@@ -118,8 +113,11 @@ public class FetchMovieDetailsTask extends AsyncTask<String, Void, Movie[]> {
 
             contentValuesArrayList.add(trailerValues);
         }
-
-        return contentValuesArrayList;
+        if (contentValuesArrayList.size() > 0) {
+            ContentValues[] contentValuesArray = new ContentValues[contentValuesArrayList.size()];
+            contentValuesArrayList.toArray(contentValuesArray);
+            mContext.getContentResolver().bulkInsert(MovieContract.MovieEntry.CONTENT_URI, contentValuesArray);
+        }
     }
 
     @Override
@@ -128,7 +126,7 @@ public class FetchMovieDetailsTask extends AsyncTask<String, Void, Movie[]> {
         if (params.length == 0) {
             return null;
         }
-        String sortOrder = params[0];
+        String movieId = params[0];
         // These two need to be declared outside the try/catch
         // so that they can be closed in the finally block.
         HttpURLConnection urlConnection = null;
@@ -141,7 +139,7 @@ public class FetchMovieDetailsTask extends AsyncTask<String, Void, Movie[]> {
             // Construct the URL for the themoviedb.org query
             // Possible parameters are avaiable at TMDB's API page, at
             // http://docs.themoviedb.apiary.io/#reference/discover/discovermovie
-            URL url = new URL("http://api.themoviedb.org/3/discover/movie?sort_by=" + sortOrder + "&api_key=" + UrlHelper.API_KEY);
+            URL url = UrlHelper.getMovieDetailUrl(movieId);
 
             // Create the request to themoviedb.org, and open the connection
             urlConnection = (HttpURLConnection) url.openConnection();
@@ -170,6 +168,7 @@ public class FetchMovieDetailsTask extends AsyncTask<String, Void, Movie[]> {
                 return null;
             }
             moviesJsonStr = buffer.toString();
+
         } catch (IOException e) {
             Log.e(LOG_TAG, "Error ", e);
             // If the code didn't successfully get the movie data, there's no point in attemping
@@ -189,7 +188,9 @@ public class FetchMovieDetailsTask extends AsyncTask<String, Void, Movie[]> {
         }
 
         try {
-            return getMovieDataFromJson(moviesJsonStr);
+            JSONObject movieDetailJson = new JSONObject(moviesJsonStr);
+            getAndSaveMovieReviewsFromJson(movieDetailJson.getJSONObject(TMDB_TRAILERS));
+            getAndSaveMovieReviewsFromJson(movieDetailJson.getJSONObject(TMDB_REVIEWS));
         } catch (JSONException e) {
             Log.e(LOG_TAG, e.getMessage(), e);
             e.printStackTrace();

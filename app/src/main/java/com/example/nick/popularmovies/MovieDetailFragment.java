@@ -7,9 +7,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.ShareActionProvider;
 import android.text.Html;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +19,7 @@ import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
+import com.example.nick.popularmovies.data.MovieContract;
 import com.example.nick.popularmovies.data.MovieContract.MovieEntry;
 import com.example.nick.popularmovies.data.MovieContract.MovieReviewsEntry;
 import com.example.nick.popularmovies.data.MovieContract.MovieTrailersEntry;
@@ -32,62 +35,99 @@ public class MovieDetailFragment extends Fragment {
     private static final String LOG_TAG = MovieDetailFragment.class.getSimpleName();
     private static final String FORECAST_SHARE_HASHTAG = " #SunshineApp";
 
+
     private static final int LOADER_MOVIE_DETAIL    = 0;
     private static final int LOADER_MOVIE_REVIEW    = 1;
     private static final int LOADER_MOVIE_TRAILER   = 2;
-
+    private static final String MOVIE_ID_ARG = "movie_id";
     //projection
-    private static final String[] DETAIL_PROJECTION_COLUMNS = {
-            MovieEntry.TABLE_NAME + "." + MovieEntry._ID,
+    private static final String[] MOVIE_DETAIL_COLUMNS = {
+            //MovieEntry.TABLE_NAME + "." + MovieEntry._ID,
             MovieEntry.COLUMN_RATING,
             MovieEntry.COLUMN_SYNOPSIS,
             MovieEntry.COLUMN_RATING,
             MovieEntry.COLUMN_IMAGE_LINK,
+    };
+
+    private static final String[] MOVIE_REVIEWS_COLUMNS = {
             MovieReviewsEntry.COLUMN_REVIEW,
             MovieReviewsEntry.COLUMN_REVIEW_LINK,
             MovieReviewsEntry.COLUMN_AUTHOR,
+    };
+
+    private static final String[] MOVIE_TRAILERS_COLUMNS = {
             MovieTrailersEntry.COLUMN_NAME,
             MovieTrailersEntry.COLUMN_KEY,
-
-            // This works because the WeatherProvider returns location data joined with
-            // weather data, even though they're stored in two different tables.
-            //WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING
     };
+
     private ShareActionProvider mShareActionProvider;
     private String mForecast;
     private Uri mUri;
-    public MovieDetailFragment() {
-    }
-
     private LoaderManager.LoaderCallbacks<Cursor> MovieLoader = new LoaderManager.LoaderCallbacks<Cursor>() {
         @Override
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-            switch(id) {
-                case LOADER_MOVIE_DETAIL:
-                    CursorLoader
-                    break;
-                case LOADER_MOVIE_REVIEW:
-                    break;
-                case LOADER_MOVIE_TRAILER:
-                    break;
-                default:
 
+            if (args != null) {
+
+                long movieId = args.getLong(MOVIE_ID_ARG, 0);
+                switch (id) {
+                    case LOADER_MOVIE_DETAIL:
+                        return new CursorLoader(getActivity(),
+                                MovieContract.MovieEntry.buildMovieUri(movieId),
+                                MOVIE_DETAIL_COLUMNS,
+                                null,
+                                null,
+                                null);
+
+                    case LOADER_MOVIE_REVIEW:
+                        return new CursorLoader(getActivity(),
+                                MovieContract.MovieReviewsEntry.buildReviewUri(movieId),
+                                MOVIE_REVIEWS_COLUMNS,
+                                null,
+                                null,
+                                null);
+
+                    case LOADER_MOVIE_TRAILER:
+                        return new CursorLoader(getActivity(),
+                                MovieContract.MovieTrailersEntry.buildTrailerUri(movieId),
+                                MOVIE_TRAILERS_COLUMNS,
+                                null,
+                                null,
+                                null);
+                }
             }
+
+            Log.e(LOG_TAG, "Unexpected switch case outcome due to unknown loader id");
             return null;
         }
 
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+            /**
+             * Pull out the data, pop it into the views
+             */
+            if (data != null && data.moveToFirst()) {
+                switch (loader.getId()) {
+                    case LOADER_MOVIE_DETAIL:
 
+                        break;
+                    case LOADER_MOVIE_REVIEW:
+                        break;
+                    case LOADER_MOVIE_TRAILER:
+                        break;
+
+                }
+
+            }
         }
-
         @Override
         public void onLoaderReset(Loader<Cursor> loader) {
 
         }
     };
 
-
+    public MovieDetailFragment() {
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
