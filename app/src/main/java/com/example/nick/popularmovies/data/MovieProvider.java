@@ -67,9 +67,25 @@ public class MovieProvider extends ContentProvider {
 
     @Override
     public String getType(Uri uri) {
-        // TODO: Implement this to handle requests for the MIME type of the data
-        // at the given URI.
-        throw new UnsupportedOperationException("Not yet implemented");
+
+        final int match = sUriMatcher.match(uri);
+
+        switch (match) {
+            case MOVIE_WITH_ID:
+                return MovieContract.MovieEntry.CONTENT_ITEM_TYPE;
+            case MOVIE:
+                return MovieContract.MovieEntry.CONTENT_TYPE;
+            case REVIEW: //for bulk inserting
+                return MovieContract.MovieReviewsEntry.CONTENT_TYPE;
+            case REVIEW_WITH_MOVIE_ID:
+                return MovieContract.MovieReviewsEntry.CONTENT_ITEM_TYPE;
+            case TRAILER:// for bulk inserting
+                return MovieContract.MovieTrailersEntry.CONTENT_TYPE;
+            case TRAILER_WITH_MOVIE_ID:
+                return MovieContract.MovieTrailersEntry.CONTENT_ITEM_TYPE;
+
+        }
+        throw new UnsupportedOperationException("Unknown uri: " + uri);
     }
 
     @Override

@@ -60,6 +60,7 @@ public class MovieDetailFragment extends Fragment {
             MovieTrailersEntry.COLUMN_KEY,
     };
 
+
     private ShareActionProvider mShareActionProvider;
     private String mForecast;
     private Uri mUri;

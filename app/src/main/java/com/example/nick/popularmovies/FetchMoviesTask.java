@@ -1,8 +1,11 @@
+package com.example.nick.popularmovies;
+
+import android.content.ContentValues;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.example.nick.popularmovies.Movie;
-import com.example.nick.popularmovies.UrlHelper;
+import com.example.nick.popularmovies.data.MovieContract;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -15,60 +18,57 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * todo: save data to the database instead
  */
-public class FetchMoviesTask extends AsyncTask<String, Void, Movie[]> {
+public class FetchMoviesTask extends AsyncTask<String, Void, Void> {
 
     final String LOG_TAG = FetchMoviesTask.class.getSimpleName();
     final String TMDB_RESULTS = "results";
     final String TMDB_TITLE = "title";
-    final String TMDB_ORIGINAL_TITLE = "original_title";
     final String TMDB_VOTE_AVERAGE = "vote_average";
     final String TMDB_IMAGE_LINK = "poster_path";
     final String TMDB_OVERVIEW = "overview";
     final String TMDB_RELEASE_DATE = "release_date";
 
-    @Override
-    protected void onPostExecute(Movie[] movies) {
-        if (movies != null) {
-            mMovieList = new ArrayList<Movie>(Arrays.<Movie>asList(movies));
-            mMovieAdapter.clear();
-                /*for(Movie m: movies) {
-                    mMovieAdapter.add(m);
-                }*/
-            mMovieAdapter.addAll(mMovieList);
-        }
+    private final Context mContext;
+
+    public FetchMoviesTask(Context c) {
+        mContext = c;
     }
 
-    private Movie[] getMovieDataFromJson(String jsonMovieData) throws JSONException {
+    private void getMovieDataFromJson(String jsonMovieData) throws JSONException {
 
         JSONObject moviesJson = new JSONObject(jsonMovieData);
         JSONArray moviesArray = moviesJson.getJSONArray(TMDB_RESULTS);
 
-        Movie[] movies = new Movie[moviesArray.length()];
-
+        ArrayList<ContentValues> contentValuesArrayList = new ArrayList<ContentValues>(moviesArray.length());
 
         for (int i = 0; i < moviesArray.length(); i++) {
 
+            ContentValues movieValues = new ContentValues();
+
             JSONObject movieData = moviesArray.getJSONObject(i);
 
-            movies[i] = new Movie();
-            movies[i].title = movieData.getString(TMDB_TITLE);
-            movies[i].originalTitle = movieData.getString(TMDB_ORIGINAL_TITLE);
-            movies[i].synopsis = movieData.getString(TMDB_OVERVIEW);
-            movies[i].imageLink = movieData.getString(TMDB_IMAGE_LINK);
-            movies[i].userRating = movieData.getDouble(TMDB_VOTE_AVERAGE) / 2; // it's out of 10, need it out of 5
-            movies[i].releaseDate = movieData.getString(TMDB_RELEASE_DATE);
+            movieValues.put(MovieContract.MovieEntry.COLUMN_TITLE, movieData.getString(TMDB_TITLE));
+            movieValues.put(MovieContract.MovieEntry.COLUMN_SYNOPSIS, movieData.getString(TMDB_OVERVIEW));
+            movieValues.put(MovieContract.MovieEntry.COLUMN_IMAGE_LINK, movieData.getString(TMDB_IMAGE_LINK));
+            movieValues.put(MovieContract.MovieEntry.COLUMN_RATING, movieData.getDouble(TMDB_VOTE_AVERAGE) / 2); // it's out of 10, need it out of 5
+            movieValues.put(MovieContract.MovieEntry.COLUMN_RELEASE_DATE, movieData.getString(TMDB_RELEASE_DATE));
+
+            contentValuesArrayList.add(movieValues);
         }
 
-        return movies;
+        if (contentValuesArrayList.size() > 0) {
+            ContentValues[] contentValuesArray = new ContentValues[contentValuesArrayList.size()];
+            contentValuesArrayList.toArray(contentValuesArray);
+            mContext.getContentResolver().bulkInsert(MovieContract.MovieEntry.CONTENT_URI, contentValuesArray);
+        }
     }
 
     @Override
-    protected Movie[] doInBackground(String... params) {
+    protected Void doInBackground(String... params) {
 
         if (params.length == 0) {
             return null;
@@ -134,7 +134,7 @@ public class FetchMoviesTask extends AsyncTask<String, Void, Movie[]> {
         }
 
         try {
-            return getMovieDataFromJson(moviesJsonStr);
+            getMovieDataFromJson(moviesJsonStr);
         } catch (JSONException e) {
             Log.e(LOG_TAG, e.getMessage(), e);
             e.printStackTrace();

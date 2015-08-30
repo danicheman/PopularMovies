@@ -4,7 +4,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.ArrayAdapter;
 
 import com.example.nick.popularmovies.data.MovieContract;
 import com.example.nick.popularmovies.data.MovieContract.MovieReviewsEntry;
@@ -26,7 +25,7 @@ import java.util.ArrayList;
  * todo: fetch genres, trailers and reviews
  * todo: save data to the database
  */
-public class FetchMovieDetailsTask extends AsyncTask<String, Void, Movie[]> {
+public class FetchMovieDetailsTask extends AsyncTask<Integer, Void, Void> {
 
     final String LOG_TAG = FetchMovieDetailsTask.class.getSimpleName();
 
@@ -37,7 +36,7 @@ public class FetchMovieDetailsTask extends AsyncTask<String, Void, Movie[]> {
 
     private final Context mContext;
 
-    public FetchMovieDetailsTask(Context c, ArrayAdapter) {
+    public FetchMovieDetailsTask(Context c) {
         mContext = c;
     }
 
@@ -52,22 +51,15 @@ public class FetchMovieDetailsTask extends AsyncTask<String, Void, Movie[]> {
     /**
      * Get details from the api and save them to the database
      */
-    private void getAndSaveMovieTrailersFromJson(JSONObject jsonTrailerData) throws JSONException {
+    private void getAndSaveMovieTrailersFromJson(JSONArray jsonTrailerArray, int movieId) throws JSONException {
 
-        JSONObject trailersJson = new JSONObject(jsonTrailerData.getJSONObject(TMDB_TRAILERS_YT));
+        ArrayList<ContentValues> contentValuesArrayList = new ArrayList<ContentValues>(jsonTrailerArray.length());
 
-        //get the movie id
-        int movieId = trailersJson.getInt("id");
-
-        //get all trailers
-        JSONArray trailersArray = trailersJson.getJSONArray(TMDB_RESULTS);
-        ArrayList<ContentValues> contentValuesArrayList = new ArrayList<ContentValues>(trailersArray.length());
-
-        for (int i = 0; i < trailersArray.length(); i++) {
+        for (int i = 0; i < jsonTrailerArray.length(); i++) {
 
             ContentValues trailerValues = new ContentValues();
 
-            JSONObject trailerData = trailersArray.getJSONObject(i);
+            JSONObject trailerData = jsonTrailerArray.getJSONObject(i);
 
             trailerValues.put(MovieTrailersEntry.COLUMN_KEY, trailerData.getString("key"));
             trailerValues.put(MovieTrailersEntry.COLUMN_NAME, trailerData.getString("name"));
@@ -75,58 +67,51 @@ public class FetchMovieDetailsTask extends AsyncTask<String, Void, Movie[]> {
 
             contentValuesArrayList.add(trailerValues);
         }
+
         if (contentValuesArrayList.size() > 0) {
             ContentValues[] contentValuesArray = new ContentValues[contentValuesArrayList.size()];
             contentValuesArrayList.toArray(contentValuesArray);
-            mContext.getContentResolver().bulkInsert(MovieContract.MovieEntry.CONTENT_URI, contentValuesArray);
+            mContext.getContentResolver().bulkInsert(MovieContract.MovieTrailersEntry.CONTENT_URI, contentValuesArray);
         }
-
-
-        return contentValuesArrayList;
     }
 
     /**
      * Get details from the api and save them to the database
      */
-    private void getAndSaveMovieReviewsFromJson(JSONObject jsonTrailerData) throws JSONException {
+    private void getAndSaveMovieReviewsFromJson(JSONArray reviewArray, int movieId) throws JSONException {
 
-        JSONObject trailersJson = new JSONObject(jsonTrailerData);
+        ArrayList<ContentValues> contentValuesArrayList = new ArrayList<>(reviewArray.length());
 
-        //get the movie id
-        int movieId = trailersJson.getInt("id");
+        for (int i = 0; i < reviewArray.length(); i++) {
 
-        //get all trailers
-        JSONArray trailersArray = trailersJson.getJSONArray(TMDB_RESULTS);
-        ArrayList<ContentValues> contentValuesArrayList = new ArrayList<>(trailersArray.length());
+            ContentValues reviewValues = new ContentValues();
 
-        for (int i = 0; i < trailersArray.length(); i++) {
+            JSONObject reviewData = reviewArray.getJSONObject(i);
 
-            ContentValues trailerValues = new ContentValues();
+            reviewValues.put(MovieReviewsEntry.COLUMN_REVIEW_ID, reviewData.getString("id"));
+            reviewValues.put(MovieReviewsEntry.COLUMN_REVIEW, reviewData.getString("content"));
+            reviewValues.put(MovieReviewsEntry.COLUMN_REVIEW_LINK, reviewData.getString("url"));
+            reviewValues.put(MovieReviewsEntry.COLUMN_AUTHOR, reviewData.getString("author"));
+            reviewValues.put(MovieReviewsEntry.COLUMN_MOVIE_ID, movieId);
 
-            JSONObject trailerData = trailersArray.getJSONObject(i);
-
-            trailerValues.put(MovieReviewsEntry.COLUMN_REVIEW_ID, trailerData.getString("id"));
-            trailerValues.put(MovieReviewsEntry.COLUMN_REVIEW, trailerData.getString("content"));
-            trailerValues.put(MovieReviewsEntry.COLUMN_REVIEW_LINK, trailerData.getString("url"));
-            trailerValues.put(MovieReviewsEntry.COLUMN_AUTHOR, trailerData.getString("author"));
-            trailerValues.put(MovieReviewsEntry.COLUMN_MOVIE_ID, movieId);
-
-            contentValuesArrayList.add(trailerValues);
+            contentValuesArrayList.add(reviewValues);
         }
         if (contentValuesArrayList.size() > 0) {
             ContentValues[] contentValuesArray = new ContentValues[contentValuesArrayList.size()];
             contentValuesArrayList.toArray(contentValuesArray);
-            mContext.getContentResolver().bulkInsert(MovieContract.MovieEntry.CONTENT_URI, contentValuesArray);
+            mContext.getContentResolver().bulkInsert(MovieContract.MovieReviewsEntry.CONTENT_URI, contentValuesArray);
         }
     }
 
     @Override
-    protected Movie[] doInBackground(String... params) {
+    protected Void doInBackground(Integer... params) {
 
         if (params.length == 0) {
             return null;
         }
-        String movieId = params[0];
+
+        int movieId = params[0];
+
         // These two need to be declared outside the try/catch
         // so that they can be closed in the finally block.
         HttpURLConnection urlConnection = null;
@@ -188,13 +173,20 @@ public class FetchMovieDetailsTask extends AsyncTask<String, Void, Movie[]> {
         }
 
         try {
+
+            //get trailer results
             JSONObject movieDetailJson = new JSONObject(moviesJsonStr);
-            getAndSaveMovieReviewsFromJson(movieDetailJson.getJSONObject(TMDB_TRAILERS));
-            getAndSaveMovieReviewsFromJson(movieDetailJson.getJSONObject(TMDB_REVIEWS));
+            JSONArray trailerArray = movieDetailJson.getJSONObject(TMDB_TRAILERS).getJSONArray(TMDB_TRAILERS_YT);
+            getAndSaveMovieTrailersFromJson(trailerArray, movieId);
+
+            //get review results
+            JSONArray reviewArray = movieDetailJson.getJSONObject(TMDB_REVIEWS).getJSONArray(TMDB_RESULTS);
+            getAndSaveMovieReviewsFromJson(reviewArray, movieId);
         } catch (JSONException e) {
             Log.e(LOG_TAG, e.getMessage(), e);
             e.printStackTrace();
         }
+
         return null;
     }
 }

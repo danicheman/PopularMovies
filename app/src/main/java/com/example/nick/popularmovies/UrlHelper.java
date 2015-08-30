@@ -17,9 +17,9 @@ public class UrlHelper {
     private static final String TMDB_ALL_DATA_PREFIX = "http://api.themoviedb.org/3/movie/";
     private static final String TMDB_ALL_DATA_SUFFIX = "api_key=" + API_KEY + "&append_to_response=trailers,reviews";
 
-    public static String getMovieImageLink(Movie m) {
-        if (m.imageLink == null) return null;
-        return BASE_IMAGE_URL + m.imageLink;
+    public static String getMovieImageLink(String imageIdentifier) {
+        if (imageIdentifier == null) return null;
+        return BASE_IMAGE_URL + imageIdentifier;
     }
 
 
@@ -38,7 +38,7 @@ public class UrlHelper {
         return new URL(YOUTUBE_IMAGE_URL_PREFIX + t.key + YOUTUBE_IMAGE_URL_SUFFIX);
     }
 
-    public static URL getMovieDetailUrl(String movieId) throws MalformedURLException {
+    public static URL getMovieDetailUrl(int movieId) throws MalformedURLException {
         return new URL(TMDB_ALL_DATA_PREFIX + movieId + TMDB_ALL_DATA_SUFFIX);
     }
 }

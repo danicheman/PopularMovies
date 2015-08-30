@@ -16,7 +16,7 @@ import com.example.nick.popularmovies.data.MovieContract.MovieTrailersEntry;
 public class MovieDbHelper extends SQLiteOpenHelper {
 
     static final String DATABASE_NAME = "movies.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     public MovieDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -24,37 +24,19 @@ public class MovieDbHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
 
+        //create the movies table, remember if the movie is a favorite and if we've loaded both reviews and trailers (details)
         final String SQL_CREATE_MOVIE_TABLE = "CREATE TABLE " + MovieEntry.TABLE_NAME + " (" +
                 MovieEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                 MovieEntry.COLUMN_TITLE + " TEXT UNIQUE NOT NULL, " +
+                MovieEntry.COLUMN_RELEASE_DATE + " TEXT NOT NULL, " +
                 MovieEntry.COLUMN_SYNOPSIS + " TEXT NOT NULL, " +
                 MovieEntry.COLUMN_IMAGE_LINK + " TEXT NOT NULL, " +
                 MovieEntry.COLUMN_RATING + " REAL NOT NULL, " +
-                MovieEntry.COLUMN_IS_FAVORITE + " INTEGER DEFAULT 0 " +
+                MovieEntry.COLUMN_IS_FAVORITE + " INTEGER DEFAULT 0, " +
+                MovieEntry.COLUMN_GOT_DETAILS + " INTEGER DEFAULT 0 " +
                 " )";
 
         db.execSQL(SQL_CREATE_MOVIE_TABLE);
-
-        final String SQL_CREATE_GENRES_TABLE = "CREATE TABLE " +
-                GenreEntry.TABLE_NAME + " (" +
-                GenreEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-                GenreEntry.COLUMN_TITLE + " TEXT UNIQUE NOT NULL);";
-
-        db.execSQL(SQL_CREATE_GENRES_TABLE);
-
-        //link table, references both of the previous two tables
-        final String SQL_CREATE_MOVIE_GENRES_TABLE = "CREATE TABLE " +
-                MovieGenresEntry.TABLE_NAME + " (" +
-                MovieGenresEntry.COLUMN_GENRE_ID + " INTEGER NOT NULL, " +
-                MovieGenresEntry.COLUMN_MOVIE_ID + " INTEGER NOT NULL, " +
-                " FOREIGN KEY (" + MovieGenresEntry.COLUMN_MOVIE_ID + ") REFERENCES " +
-                MovieEntry.TABLE_NAME + " (" + MovieEntry._ID + "), " +
-                " FOREIGN KEY (" + MovieGenresEntry.COLUMN_GENRE_ID + ") REFERENCES " +
-                GenreEntry.TABLE_NAME + " (" + GenreEntry._ID + "), " +
-                " UNIQUE (" + MovieGenresEntry.COLUMN_MOVIE_ID + ", " +
-                MovieGenresEntry.COLUMN_GENRE_ID + ") ON CONFLICT REPLACE);";
-
-        db.execSQL(SQL_CREATE_MOVIE_GENRES_TABLE);
 
         //trailer table many to one with movies
         final String SQL_CREATE_MOVIE_TRAILERS_TABLE = "CREATE TABLE " +

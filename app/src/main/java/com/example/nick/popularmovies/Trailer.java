@@ -12,25 +12,10 @@ public class Trailer implements Parcelable{
     private static final String KEY_ID = "id";
     private static final String KEY_KEY = "key";
     private static final String KEY_NAME = "name";
-    private static final String KEY_SITE = "site";
-    private static final String KEY_TYPE = "type";
 
     public int id;
     public String key;
     public String name;
-    public String site;
-    public String type;
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-
-    }
-
     public static final Parcelable.Creator<Trailer> CREATOR = new Creator<Trailer>() {
         @Override
         public Trailer createFromParcel(Parcel source) {
@@ -41,9 +26,6 @@ public class Trailer implements Parcelable{
             trailer.id          = bundle.getInt(KEY_ID, 0);
             trailer.key         = bundle.getString(KEY_KEY, null);
             trailer.name        = bundle.getString(KEY_NAME, null);
-            trailer.site        = bundle.getString(KEY_SITE, null);
-            trailer.type        = bundle.getString(KEY_TYPE, null);
-
 
             return trailer;
         }
@@ -53,4 +35,17 @@ public class Trailer implements Parcelable{
             return new Trailer[0];
         }
     };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        Bundle bundle = new Bundle();
+        bundle.putInt(KEY_ID, id);
+        bundle.putString(KEY_NAME, name);
+        bundle.putString(KEY_KEY, key);
+    }
 }

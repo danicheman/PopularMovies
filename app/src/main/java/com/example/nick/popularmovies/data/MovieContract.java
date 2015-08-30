@@ -22,7 +22,6 @@ public class MovieContract {
     public static final String PATH_MOVIE = "movie";
     public static final String PATH_REVIEW = "review";
     public static final String PATH_TRAILER = "trailer";
-    public static final String PATH_GENRE = "genre";
 
     public static final class MovieEntry implements BaseColumns {
 
@@ -37,10 +36,12 @@ public class MovieContract {
 
         public static final String TABLE_NAME           = "movie";
         public static final String COLUMN_TITLE         = "title";
+        public static final String COLUMN_RELEASE_DATE = "release_date";
         public static final String COLUMN_SYNOPSIS      = "synopsis";
         public static final String COLUMN_RATING        = "rating";
         public static final String COLUMN_IMAGE_LINK    = "image_link";
         public static final String COLUMN_IS_FAVORITE   = "is_favorite";
+        public static final String COLUMN_GOT_DETAILS = "got_details";
 
         public static Uri buildMovieUri(long id) {
             return ContentUris.withAppendedId(CONTENT_URI, id);
