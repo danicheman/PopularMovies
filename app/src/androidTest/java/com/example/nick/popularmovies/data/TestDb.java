@@ -1,13 +1,10 @@
 package com.example.nick.popularmovies.data;
 
-import android.test.AndroidTestCase;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.test.AndroidTestCase;
 
-import com.example.nick.popularmovies.Movie;
-
-import java.util.HashMap;
 import java.util.HashSet;
 
 /**
@@ -25,7 +22,8 @@ public class TestDb extends AndroidTestCase {
     public void testCreateDb() throws Throwable {
         final HashSet<String> tableNameHashSet = new HashSet<String>();
         tableNameHashSet.add(MovieContract.MovieEntry.TABLE_NAME);
-        tableNameHashSet.add(MovieContract.GenreEntry.TABLE_NAME);
+        tableNameHashSet.add(MovieContract.MovieReviewsEntry.TABLE_NAME);
+        tableNameHashSet.add(MovieContract.MovieTrailersEntry.TABLE_NAME);
 
         mContext.deleteDatabase(MovieDbHelper.DATABASE_NAME);
         SQLiteDatabase db = new MovieDbHelper(mContext).getWritableDatabase();
@@ -76,7 +74,7 @@ public class TestDb extends AndroidTestCase {
         db.close();
     }
 
-    public long insertGenre() {
+    /*public long insertGenre() {
         // First step: Get reference to writable database
         // If there's an error in those massive SQL table creation Strings,
         // errors will be thrown here when you try to get a writable database.
@@ -111,7 +109,7 @@ public class TestDb extends AndroidTestCase {
 
         // Move the cursor to a valid database row and check to see if we got any records back
         // from the query
-        assertTrue( "Error: No Records returned from location query", cursor.moveToFirst() );
+        assertTrue("Error: No Records returned from location query", cursor.moveToFirst());
 
         // Fifth Step: Validate data in resulting Cursor with the original ContentValues
         // (you can use the validateCurrentRecord function in TestUtilities to validate the
@@ -128,26 +126,38 @@ public class TestDb extends AndroidTestCase {
         db.close();
         return genreRowId;
 
-    }
+    }*/
+
     public void testMovieTable() {insertMovie();}
 
-    public void testGenreTable() {insertGenre();}
+    public void testMovieReviewTable() {
 
-    public void testMovieGenreTable() {
-        long genreId = insertGenre();
         long movieId = insertMovie();
 
         MovieDbHelper dbHelper = new MovieDbHelper(mContext);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
-        ContentValues testValues = new ContentValues();
+        ContentValues reviewValues = TestUtilities.createReviewValues();
 
-        testValues.put(MovieContract.MovieGenresEntry.COLUMN_MOVIE_ID, movieId);
-        testValues.put(MovieContract.MovieGenresEntry.COLUMN_GENRE_ID, genreId);
-
-        long insertResult = db.insert(MovieContract.MovieGenresEntry.TABLE_NAME, null, testValues);
+        reviewValues.put(MovieContract.MovieReviewsEntry.COLUMN_MOVIE_ID, movieId);
+        long insertResult = db.insert(MovieContract.MovieReviewsEntry.TABLE_NAME, null, reviewValues);
         assertTrue("Error, movie genre table insert failed", insertResult != -1);
     }
+
+    public void testMovieTrailerTable() {
+
+        long movieId = insertMovie();
+
+        MovieDbHelper dbHelper = new MovieDbHelper(mContext);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        ContentValues trailerValues = TestUtilities.createTrailerValues();
+
+        trailerValues.put(MovieContract.MovieReviewsEntry.COLUMN_MOVIE_ID, movieId);
+        long insertResult = db.insert(MovieContract.MovieTrailersEntry.TABLE_NAME, null, trailerValues);
+        assertTrue("Error, movie genre table insert failed", insertResult != -1);
+    }
+
 
     public long insertMovie() {
         // First step: Get reference to writable database

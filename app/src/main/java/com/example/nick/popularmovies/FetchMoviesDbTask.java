@@ -22,9 +22,9 @@ import java.util.ArrayList;
 /**
  * todo: save data to the database instead
  */
-public class FetchMoviesTask extends AsyncTask<String, Void, Void> {
+public class FetchMoviesDbTask extends AsyncTask<String, Void, Void> {
 
-    final String LOG_TAG = FetchMoviesTask.class.getSimpleName();
+    final String LOG_TAG = FetchMoviesDbTask.class.getSimpleName();
     final String TMDB_RESULTS = "results";
     final String TMDB_TITLE = "title";
     final String TMDB_VOTE_AVERAGE = "vote_average";
@@ -34,7 +34,7 @@ public class FetchMoviesTask extends AsyncTask<String, Void, Void> {
 
     private final Context mContext;
 
-    public FetchMoviesTask(Context c) {
+    public FetchMoviesDbTask(Context c) {
         mContext = c;
     }
 

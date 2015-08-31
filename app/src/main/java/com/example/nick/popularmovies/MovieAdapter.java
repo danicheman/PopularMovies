@@ -1,32 +1,34 @@
 package com.example.nick.popularmovies;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CursorAdapter;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 
 import com.squareup.picasso.Picasso;
+
+import java.util.List;
 
 /**
  * Created by NICK on 7/15/2015.
  * Adapt the movie data to the grid view
  */
-public class MovieAdapter extends CursorAdapter {
-
+public class MovieAdapter extends ArrayAdapter<Movie> {
     final String LOG_TAG = MoviesFragment.class.getSimpleName();
+    private List<Movie> movies;
 
-    public MovieAdapter(Context context, Cursor c, int flags) {
-        super(context, c, flags);
+    public MovieAdapter(Context context, List<Movie> movies) {
+        super(context, 0, movies);
+        this.movies = movies;
     }
 
-    /*@Override
+    @Override
     public Movie getItem(int position) {
         return movies.get(position);
-    }*/
+    }
 
-    /*@Override
+    @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
         ImageView moviePosterView;
@@ -52,48 +54,7 @@ public class MovieAdapter extends CursorAdapter {
             moviePosterView.setImageResource(R.drawable.noposter);
         }
         return moviePosterView;
-    }*/
-
-    @Override
-    public View newView(Context context, Cursor cursor, ViewGroup parent) {
-
-        /*int viewType = getItemViewType(cursor.getPosition());
-        int layoutId = -1;
-        switch (viewType) {
-            case VIEW_TYPE_TABLET:
-                layoutId = R.layout.list_item_highlight;
-                break;
-            case VIEW_TYPE_MOBILE:
-                layoutId = R.layout.list_item_regular;
-                break;
-        }
-
-        View view = LayoutInflater.from(context).inflate(layoutId, parent, false);
-
-        ViewHolder viewHolder = new ViewHolder(view);
-        view.setTag(viewHolder);*/
-
-        return new ImageView(context);
     }
 
-    //magic happens here now.
-    @Override
-    public void bindView(View view, Context context, Cursor cursor) {
 
-        ImageView moviePosterView;
-        moviePosterView = (ImageView) view;
-
-        String imageId = cursor.getString(MoviesFragment.COL_IMAGE_LINK);
-        String movieImageLink = UrlHelper.getMovieImageLink(imageId);
-
-        if (movieImageLink != null) {
-            Picasso.with(context)
-                    .load(movieImageLink)
-                    .placeholder(R.drawable.default_movie_image)
-                    .error(R.drawable.noposter)
-                    .into(moviePosterView);
-        } else {
-            moviePosterView.setImageResource(R.drawable.noposter);
-        }
-    }
 }
