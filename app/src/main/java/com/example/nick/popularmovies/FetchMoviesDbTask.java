@@ -20,7 +20,7 @@ import java.net.URL;
 import java.util.ArrayList;
 
 /**
- * todo: save data to the database instead
+ * Don't use this.
  */
 public class FetchMoviesDbTask extends AsyncTask<String, Void, Void> {
 

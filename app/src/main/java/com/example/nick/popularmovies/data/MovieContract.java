@@ -46,36 +46,11 @@ public class MovieContract {
         public static Uri buildMovieUri(long id) {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
-    }
 
-    public static final class MovieGenresEntry {
+        public static String getMovieIdFromUri(Uri uri) {
+            return uri.getPathSegments().get(1);
 
-        public static final Uri CONTENT_URI =
-                BASE_CONTENT_URI.buildUpon().appendPath(PATH_MOVIE).build();
-
-        public static final String CONTENT_TYPE =
-                ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_MOVIE;
-        public static final String CONTENT_ITEM_TYPE =
-                ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_MOVIE;
-
-        public static final String TABLE_NAME = "movies_genres";
-        public static final String COLUMN_GENRE_ID = "genre_id";
-        public static final String COLUMN_MOVIE_ID = "movie_id";
-    }
-
-    //http://api.themoviedb.org/3/genre/movie/list?api_key=b8a4068d1466dca29becff1029e0e0e1
-    public static final class GenreEntry implements BaseColumns {
-
-        public static final Uri CONTENT_URI =
-                BASE_CONTENT_URI.buildUpon().appendPath(PATH_MOVIE).build();
-
-        public static final String CONTENT_TYPE =
-                ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_MOVIE;
-        public static final String CONTENT_ITEM_TYPE =
-                ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_MOVIE;
-
-        public static final String TABLE_NAME = "genre";
-        public static final String COLUMN_TITLE = "genre";
+        }
     }
 
     //1 to 1 relationship with movies
@@ -97,6 +72,12 @@ public class MovieContract {
         public static Uri buildTrailerUri(long id) {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
+
+        public static String getMovieIdFromUri(Uri uri) {
+            return uri.getPathSegments().get(1);
+
+        }
+
     }
 
     //1 to 1 relationship with movies
@@ -121,6 +102,10 @@ public class MovieContract {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
 
+        public static String getMovieIdFromUri(Uri uri) {
+            return uri.getPathSegments().get(1);
+
+        }
     }
 
 }

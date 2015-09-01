@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 
 public class MovieProvider extends ContentProvider {
@@ -32,6 +33,54 @@ public class MovieProvider extends ContentProvider {
         matcher.addURI(authority, MovieContract.PATH_REVIEW + "/#", REVIEW_WITH_MOVIE_ID);
         //match different URIs here
         return matcher;
+    }
+
+    //id = ?
+    private final Cursor getMovieById(Uri uri, String[] projection) {
+        String movieId = MovieContract.MovieEntry.getMovieIdFromUri(uri);
+
+        SQLiteQueryBuilder sqLiteQueryBuilder = new SQLiteQueryBuilder();
+        sqLiteQueryBuilder.setTables(MovieContract.MovieEntry.TABLE_NAME);
+
+        return sqLiteQueryBuilder.query(mOpenHelper.getReadableDatabase(),
+                projection,
+                MovieContract.MovieEntry._ID + " = ?",
+                new String[]{movieId}, null, null, null);
+    }
+
+    //id = ?
+    private final Cursor getReviewsByMovieId(Uri uri, String[] projection) {
+
+        String movieId = MovieContract.MovieReviewsEntry.getMovieIdFromUri(uri);
+
+        SQLiteQueryBuilder sqLiteQueryBuilder = new SQLiteQueryBuilder();
+        sqLiteQueryBuilder.setTables(MovieContract.MovieReviewsEntry.TABLE_NAME);
+
+
+        return sqLiteQueryBuilder.query(mOpenHelper.getReadableDatabase(),
+                projection,
+                MovieContract.MovieReviewsEntry.COLUMN_MOVIE_ID + " = ?",
+                new String[]{movieId}, null, null, null);
+    }
+
+    private final Cursor getTrailersByMovieId(Uri uri, String[] projection) {
+        String movieId = MovieContract.MovieTrailersEntry.getMovieIdFromUri(uri);
+
+        SQLiteQueryBuilder sqLiteQueryBuilder = new SQLiteQueryBuilder();
+        sqLiteQueryBuilder.setTables(MovieContract.MovieTrailersEntry.TABLE_NAME);
+
+        return sqLiteQueryBuilder.query(mOpenHelper.getReadableDatabase(),
+                projection,
+                MovieContract.MovieTrailersEntry.COLUMN_MOVIE_ID + " = ?",
+                new String[]{movieId}, null, null, null);
+    }
+
+    private final Cursor getFavoriteMovies(Uri uri, String[] projection) {
+        SQLiteQueryBuilder sqLiteQueryBuilder = new SQLiteQueryBuilder();
+        sqLiteQueryBuilder.setTables(MovieContract.MovieEntry.TABLE_NAME);
+
+        return sqLiteQueryBuilder.query(mOpenHelper.getReadableDatabase(),
+                projection, null, null, null, null, null);
     }
 
     @Override
@@ -131,15 +180,33 @@ public class MovieProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
-        // TODO: Implement this to initialize your content provider on startup.
-        return false;
+        mOpenHelper = new MovieDbHelper(getContext());
+        return true;
     }
 
     @Override
     public Cursor query(Uri uri, String[] projection, String selection,
                         String[] selectionArgs, String sortOrder) {
-        // TODO: Implement this to handle query requests from clients.
-        throw new UnsupportedOperationException("Not yet implemented");
+
+        Cursor resultCursor;
+
+        switch (sUriMatcher.match(uri)) {
+            case MOVIE_WITH_ID:
+                resultCursor = getMovieById(uri, projection);
+                break;
+            case TRAILER_WITH_MOVIE_ID:
+                resultCursor = getTrailersByMovieId(uri, projection);
+                break;
+            case REVIEW_WITH_MOVIE_ID:
+                resultCursor = getReviewsByMovieId(uri, projection);
+                break;
+            case MOVIE: //just for favorites
+                resultCursor = getFavoriteMovies(uri, projection);
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
+        return resultCursor;
     }
 
     @Override

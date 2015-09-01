@@ -52,7 +52,9 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
     };
     final String LOG_TAG = MoviesFragment.class.getSimpleName();
     //The adapter to prepare the data for the view
-    private CursorAdapter mMovieAdapter;
+    private MovieAdapter mMovieAdapter;
+    private CursorAdapter mMovieDbAdapter;
+
     //The array of movies retrieved from the server
     private ArrayList<Movie> mMovieList;
     private GridView mGridView;
@@ -81,7 +83,7 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
             return;
         }
 
-        FetchMoviesDbTask moviesTask = new FetchMoviesDbTask(getActivity());
+        FetchMoviesTask moviesTask = new FetchMoviesTask();
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         //get sort order or default_movie_image value
@@ -107,13 +109,13 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        /*if (savedInstanceState != null) {
+        if (savedInstanceState != null) {
             mMovieList = savedInstanceState.getParcelableArrayList(KEY_MOVIES_LIST);
         } else {
             mMovieList = new ArrayList<Movie>();
-        }*/
+        }
 
-        mMovieAdapter = new MovieDbAdapter(getActivity(), null, 0);
+        mMovieAdapter = new MovieAdapter(getActivity(), mMovieList);
 
         View rootView = inflater.inflate(R.layout.fragment_movies, container, false);
 
@@ -171,7 +173,7 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        mMovieAdapter.swapCursor(data);
+        mMovieDbAdapter.swapCursor(data);
         if (mPosition != ListView.INVALID_POSITION) {
             // If we don't need to restart the loader, and there's a desired position to restore
             // to, do so now.
