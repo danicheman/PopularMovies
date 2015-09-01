@@ -79,5 +79,7 @@ public class MovieDetailActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    public void onToggleStar(View v) {
 
+    }
 }

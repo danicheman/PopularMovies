@@ -1,6 +1,7 @@
 package com.example.nick.popularmovies;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
@@ -125,15 +126,18 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Cursor cursor = (Cursor) parent.getItemAtPosition(position);
+                Movie clickedMovie = (Movie) parent.getItemAtPosition(position);
+
                 //the callback launches the detail activity now..
-                if (cursor != null) {
-                    ((Callback) getActivity()).onItemSelected(MovieEntry.buildMovieUri(cursor.getLong(COL_MOVIE_ID)));
-                }
-                /*Movie clickedMovie = mMovieAdapter.getItem(position);
+                //todo: different activity for click if sort is by favorites
+                /*if (clickedMovie != null ) {
+                    ((Callback) getActivity()).onItemSelected(MovieEntry.buildMovieUri(clickedMovie.id));
+                }*/
+                //Movie clickedMovie = mMovieAdapter.getItem(position);
+                //todo: only use this if the sort is NOT favorites.
                 Intent intent = new Intent(getActivity(), MovieDetailActivity.class)
                         .putExtra(MOVIE_BUNDLE, clickedMovie);
-                startActivity(intent);*/
+                startActivity(intent);
             }
         });
 
