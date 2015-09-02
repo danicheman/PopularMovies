@@ -25,9 +25,9 @@ import java.util.ArrayList;
  * todo: fetch genres, trailers and reviews
  * todo: save data to the database
  */
-public class FetchMovieDetailsTask extends AsyncTask<Integer, Void, Void> {
+public class FetchMovieDetailsDbTask extends AsyncTask<Integer, Void, Void> {
 
-    final String LOG_TAG = FetchMovieDetailsTask.class.getSimpleName();
+    final String LOG_TAG = FetchMovieDetailsDbTask.class.getSimpleName();
 
     final String TMDB_TRAILERS = "trailers";
     final String TMDB_TRAILERS_YT = "youtube";
@@ -36,7 +36,7 @@ public class FetchMovieDetailsTask extends AsyncTask<Integer, Void, Void> {
 
     private final Context mContext;
 
-    public FetchMovieDetailsTask(Context c) {
+    public FetchMovieDetailsDbTask(Context c) {
         mContext = c;
     }
 
