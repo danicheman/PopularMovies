@@ -20,6 +20,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
@@ -46,6 +47,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 //todo: separate movie detail fragment from favorite movie detail fragment?
 public class MovieDetailFragment extends Fragment {
@@ -83,8 +85,8 @@ public class MovieDetailFragment extends Fragment {
     private ShareActionProvider mShareActionProvider;
     private Uri mUri;
 
-    private Review[] mReviews;
-    private Trailer[] mTrailers;
+    private List<Review> mReviews;
+    private List<Trailer> mTrailers;
     private LoaderManager.LoaderCallbacks<Cursor> FavoriteLoader = new LoaderManager.LoaderCallbacks<Cursor>() {
         @Override
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -179,6 +181,14 @@ public class MovieDetailFragment extends Fragment {
 
         View rootView = inflater.inflate(R.layout.fragment_movie_detail, container, false);
 
+
+        TrailerAdapter mTrailerAdapter = new TrailerAdapter(getActivity(), mTrailers);
+
+        View rootView = inflater.inflate(R.layout.fragment_movies, container, false);
+
+        GridView gridView = (GridView) rootView.findViewById(R.id.trailer_grid);
+        gridView.setAdapter(mTrailerAdapter);
+
         // The detail Activity called via intent.  Inspect the intent for movie data.
         Intent intent = getActivity().getIntent();
         if (intent != null && intent.hasExtra(MoviesFragment.MOVIE_BUNDLE)) {
@@ -246,7 +256,8 @@ public class MovieDetailFragment extends Fragment {
          */
         private void getAndSaveMovieTrailersFromJson(JSONArray jsonTrailerArray, int movieId) throws JSONException {
 
-            mTrailers = new Trailer[jsonTrailerArray.length()];
+            //todo: fix dis shit
+            mTrailers = new List<Trailer>();
 
             for (int i = 0; i < jsonTrailerArray.length(); i++) {
 

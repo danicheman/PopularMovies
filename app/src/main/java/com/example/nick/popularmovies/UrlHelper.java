@@ -33,9 +33,9 @@ public class UrlHelper {
         return new URL(BASE_YOUTUBE_VIDEO_URL + t.key);
     }
 
-    public static URL getTrailerThumbUrl(Trailer t) throws MalformedURLException {
+    public static String getTrailerThumbUrl(Trailer t) {
         if (t.key == null) return null;
-        return new URL(YOUTUBE_IMAGE_URL_PREFIX + t.key + YOUTUBE_IMAGE_URL_SUFFIX);
+        return YOUTUBE_IMAGE_URL_PREFIX + t.key + YOUTUBE_IMAGE_URL_SUFFIX;
     }
 
     public static URL getMovieDetailUrl(int movieId) throws MalformedURLException {
