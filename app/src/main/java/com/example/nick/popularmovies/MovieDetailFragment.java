@@ -91,6 +91,7 @@ public class MovieDetailFragment extends Fragment {
     private ShareActionProvider mShareActionProvider;
     private Uri mUri;
     private Movie movie;
+    private GridView trailerGrid;
 
     //todo: create review adapter class
     private ArrayList<Review> mReviews;
@@ -99,6 +100,7 @@ public class MovieDetailFragment extends Fragment {
     private ArrayList<Trailer> mTrailers;
     private TrailerAdapter mTrailerAdapter;
     private LoaderManager.LoaderCallbacks<Cursor> FavoriteLoader = new LoaderManager.LoaderCallbacks<Cursor>() {
+
         @Override
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 
@@ -247,9 +249,9 @@ public class MovieDetailFragment extends Fragment {
 
         mTrailerAdapter = new TrailerAdapter(getActivity(), mTrailers);
 
-        GridView gridView = (GridView) rootView.findViewById(R.id.trailer_grid);
-        gridView.setAdapter(mTrailerAdapter);
-        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        trailerGrid = (GridView) rootView.findViewById(R.id.trailer_grid);
+        trailerGrid.setAdapter(mTrailerAdapter);
+        trailerGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Trailer clickedTrailer = mTrailerAdapter.getItem(position);
@@ -334,6 +336,7 @@ public class MovieDetailFragment extends Fragment {
                     Log.v(LOG_TAG, "got trailer: " + t.name);
                     mTrailerAdapter.add(t);
                 }
+                trailerGrid.invalidateViews();
 
                 if (mShareActionProvider != null) {
                     Log.d(LOG_TAG, "setting share action provider from Fetch Movie Details Task");

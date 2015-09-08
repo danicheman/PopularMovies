@@ -16,8 +16,8 @@ public class MainActivity extends AppCompatActivity implements MoviesFragment.Ca
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setIcon(R.mipmap.ic_launcher);
+        /*getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setIcon(R.mipmap.ic_launcher);*/
 
         if(findViewById(R.id.movie_detail_container) != null) {
             /* The detail container view will be present only in the large-screen
