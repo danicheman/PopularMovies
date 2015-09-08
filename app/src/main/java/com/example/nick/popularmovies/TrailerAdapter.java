@@ -16,16 +16,16 @@ import java.util.List;
  */
 public class TrailerAdapter extends ArrayAdapter<Trailer> {
 
-    private List<Trailer> trailers;
+    private List<Trailer> mTrailers;
 
-    public TrailerAdapter(Context context, List<Trailer> objects) {
-        super(context, 0, objects);
-        trailers = objects;
+    public TrailerAdapter(Context context, List<Trailer> trailers) {
+        super(context, 0, trailers);
+        mTrailers = trailers;
     }
 
     @Override
     public Trailer getItem(int position) {
-        return trailers.get(position);
+        return mTrailers.get(position);
     }
 
     @Override
@@ -56,4 +56,5 @@ public class TrailerAdapter extends ArrayAdapter<Trailer> {
 
         return trailerView;
     }
+
 }

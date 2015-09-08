@@ -15,7 +15,7 @@ public class UrlHelper {
     private static final String YOUTUBE_IMAGE_URL_PREFIX = "http://img.youtube.com/vi/";
     private static final String YOUTUBE_IMAGE_URL_SUFFIX = "/0.jpg";
     private static final String TMDB_ALL_DATA_PREFIX = "http://api.themoviedb.org/3/movie/";
-    private static final String TMDB_ALL_DATA_SUFFIX = "api_key=" + API_KEY + "&append_to_response=trailers,reviews";
+    private static final String TMDB_ALL_DATA_SUFFIX = "?api_key=" + API_KEY + "&append_to_response=trailers,reviews";
 
     public static String getMovieImageLink(String imageIdentifier) {
         if (imageIdentifier == null) return null;

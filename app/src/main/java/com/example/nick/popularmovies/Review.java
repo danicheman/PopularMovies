@@ -8,24 +8,6 @@ import android.os.Parcelable;
  */
 public class Review implements Parcelable{
 
-    private static final String KEY_ID = "id";
-    private static final String KEY_AUTHOR = "author";
-    private static final String KEY_CONTENT = "content";
-
-    public String id;
-    public String author;
-    public String content;
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-
-    }
-
     public static final Parcelable.Creator<Review> CREATOR = new Creator<Review>() {
         @Override
         public Review createFromParcel(Parcel source) {
@@ -37,4 +19,24 @@ public class Review implements Parcelable{
             return new Review[0];
         }
     };
+    private static final String KEY_MOVIE_ID = "movie_id";
+    private static final String KEY_REVIEW_ID = "review_id";
+    private static final String KEY_AUTHOR = "author";
+    private static final String KEY_CONTENT = "content";
+    private static final String KEY_LINK = "link";
+    public String review_id;
+    public int movie_id;
+    public String author;
+    public String content;
+    public String link;
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+
+    }
 }

@@ -213,6 +213,7 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
         final String TMDB_IMAGE_LINK = "poster_path";
         final String TMDB_OVERVIEW = "overview";
         final String TMDB_RELEASE_DATE = "release_date";
+        final String TMDB_MOVIE_ID = "id";
 
         @Override
         protected void onPostExecute(Movie[] movies) {
@@ -247,6 +248,7 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
                 movies[i].imageLink = movieData.getString(TMDB_IMAGE_LINK);
                 movies[i].userRating = movieData.getDouble(TMDB_VOTE_AVERAGE) / 2; // it's out of 10, need it out of 5
                 movies[i].releaseDate = movieData.getString(TMDB_RELEASE_DATE);
+                movies[i].id = movieData.getInt(TMDB_MOVIE_ID);
             }
 
             return movies;

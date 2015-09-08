@@ -16,7 +16,7 @@
         android:layout_height="wrap_content">
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="fill_parent">
             <TextView
                 android:id="@+id/movie_title"
                 android:layout_width="wrap_content"
@@ -91,22 +91,10 @@
                 android:background="#00ffffff"
                 android:src="@drawable/btn_star_holo_dark" />
             <TextView
-                android:id="@+id/reviews"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/rating_data"
-                android:layout_centerHorizontal="true"
-                android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                android:layout_marginRight="@dimen/activity_horizontal_margin"
-                android:text="@string/reviews"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textColor="@android:color/white" />
-
-            <TextView
                 android:id="@+id/trailers"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/reviews"
+                android:layout_below="@+id/rating_data"
                 android:layout_centerHorizontal="true"
                 android:layout_marginLeft="@dimen/activity_horizontal_margin"
                 android:layout_marginRight="@dimen/activity_horizontal_margin"
@@ -118,8 +106,33 @@
                 android:id="@+id/trailer_grid"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_below="@+id/trailers"
+                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                android:layout_marginRight="@dimen/activity_horizontal_margin"
+                android:columnWidth="130dp"
                 android:numColumns="auto_fit"
                 android:stretchMode="columnWidth"></GridView>
+
+            <TextView
+                android:id="@+id/reviews"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/trailer_grid"
+                android:layout_centerHorizontal="true"
+                android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                android:layout_marginRight="@dimen/activity_horizontal_margin"
+                android:text="@string/reviews"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@android:color/white" />
+
+            <ListView
+                android:id="@+id/review_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/reviews"></ListView>
+
         </RelativeLayout>
+
     </ScrollView>
 </RelativeLayout>
