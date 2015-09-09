@@ -16,8 +16,6 @@ public class MovieDetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_detail);
-        /*getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setIcon(R.mipmap.ic_launcher);*/
 
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
@@ -64,8 +62,4 @@ public class MovieDetailActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    //todo: handle star click, save/delete movie using a listener
-    public void onToggleStar(View v) {
-
-    }
 }
