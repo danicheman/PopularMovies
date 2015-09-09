@@ -112,9 +112,8 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
 
         if (savedInstanceState != null) {
             mMovieList = savedInstanceState.getParcelableArrayList(KEY_MOVIES_LIST);
-        } else {
-            mMovieList = new ArrayList<Movie>();
-        }
+
+        } else mMovieList = new ArrayList<>();
 
         mMovieAdapter = new MovieAdapter(getActivity(), mMovieList);
 
@@ -199,7 +198,7 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
         /**
          * DetailFragmentCallback for when an item has been selected.
          */
-        public void onItemSelected(Uri movieUri);
+        void onItemSelected(Uri movieUri);
     }
 
     //This task does not save in the database.
@@ -218,7 +217,7 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
         @Override
         protected void onPostExecute(Movie[] movies) {
             if (movies != null) {
-                mMovieList = new ArrayList<Movie>(Arrays.<Movie>asList(movies));
+                mMovieList = new ArrayList<>(Arrays.asList(movies));
                 mMovieAdapter.clear();
                 for (Movie m : movies) {
                     Log.v(LOG_TAG, "got movie: " + m.title);

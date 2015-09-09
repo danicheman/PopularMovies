@@ -6,6 +6,7 @@ import android.os.Parcelable;
 
 /**
  * Created by NICK on 8/12/2015.
+ * A video trailer
  */
 public class Trailer implements Parcelable{
 
@@ -47,5 +48,6 @@ public class Trailer implements Parcelable{
         bundle.putInt(KEY_ID, id);
         bundle.putString(KEY_NAME, name);
         bundle.putString(KEY_KEY, key);
+        dest.writeBundle(bundle);
     }
 }

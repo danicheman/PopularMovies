@@ -24,9 +24,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,6 +33,8 @@ import com.example.nick.popularmovies.data.MovieContract;
 import com.example.nick.popularmovies.data.MovieContract.MovieEntry;
 import com.example.nick.popularmovies.data.MovieContract.MovieReviewsEntry;
 import com.example.nick.popularmovies.data.MovieContract.MovieTrailersEntry;
+import com.example.nick.popularmovies.views.ExpandableHeightGridView;
+import com.example.nick.popularmovies.views.ExpandableHeightListView;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
@@ -56,6 +56,7 @@ import java.util.Arrays;
 import java.util.Date;
 
 //todo: separate movie detail fragment from favorite movie detail fragment?
+//todo: get reviews loading in expandable listview?
 public class MovieDetailFragment extends Fragment {
     static final String DETAIL_URI = "URI";
     private static final String LOG_TAG = MovieDetailFragment.class.getSimpleName();
@@ -91,7 +92,8 @@ public class MovieDetailFragment extends Fragment {
     private ShareActionProvider mShareActionProvider;
     private Uri mUri;
     private Movie movie;
-    private GridView trailerGrid;
+    private ExpandableHeightGridView trailerGrid;
+    private ExpandableHeightListView reviewList;
 
     //todo: create review adapter class
     private ArrayList<Review> mReviews;
@@ -244,12 +246,12 @@ public class MovieDetailFragment extends Fragment {
 
         mReviewAdapter = new ReviewAdapter(getActivity(), R.layout.review, mReviews);
 
-        ListView reviewListView = (ListView) rootView.findViewById(R.id.review_list);
-        reviewListView.setAdapter(mReviewAdapter);
+        reviewList = (ExpandableHeightListView) rootView.findViewById(R.id.review_grid);
+        reviewList.setAdapter(mReviewAdapter);
 
         mTrailerAdapter = new TrailerAdapter(getActivity(), mTrailers);
 
-        trailerGrid = (GridView) rootView.findViewById(R.id.trailer_grid);
+        trailerGrid = (ExpandableHeightGridView) rootView.findViewById(R.id.trailer_grid);
         trailerGrid.setAdapter(mTrailerAdapter);
         trailerGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -274,7 +276,7 @@ public class MovieDetailFragment extends Fragment {
         // The detail Activity called via intent.  Inspect the intent for movie data.
         Intent intent = getActivity().getIntent();
         if (intent != null && intent.hasExtra(MoviesFragment.MOVIE_BUNDLE)) {
-            Movie m = (Movie) intent.getParcelableExtra(MoviesFragment.MOVIE_BUNDLE);
+            Movie m = intent.getParcelableExtra(MoviesFragment.MOVIE_BUNDLE);
 
             Resources res = getResources();
             DecimalFormat df = new DecimalFormat("##.#");
@@ -336,7 +338,9 @@ public class MovieDetailFragment extends Fragment {
                     Log.v(LOG_TAG, "got trailer: " + t.name);
                     mTrailerAdapter.add(t);
                 }
-                trailerGrid.invalidateViews();
+                trailerGrid.setExpanded(true);
+
+
 
                 if (mShareActionProvider != null) {
                     Log.d(LOG_TAG, "setting share action provider from Fetch Movie Details Task");
@@ -357,7 +361,9 @@ public class MovieDetailFragment extends Fragment {
                     Log.v(LOG_TAG, "got review from: " + r.author);
                     mReviewAdapter.add(r);
                 }
+                reviewList.setExpanded(true);
             }
+
         }
 
         //todo:create constants for the two details queries.
@@ -405,8 +411,8 @@ public class MovieDetailFragment extends Fragment {
                 JSONObject reviewData = reviewArray.getJSONObject(i);
                 reviews[i] = new Review();
 
-                reviews[i].movie_id = movieId;
-                reviews[i].review_id = reviewData.getString("id");
+                reviews[i].movieId = movieId;
+                reviews[i].reviewId = reviewData.getString("id");
                 reviews[i].content = reviewData.getString("content");
                 reviews[i].link = reviewData.getString("url");
                 reviews[i].author = reviewData.getString("author");

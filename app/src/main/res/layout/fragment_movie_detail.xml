@@ -102,7 +102,7 @@
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textColor="@android:color/white" />
 
-            <GridView
+            <com.example.nick.popularmovies.views.ExpandableHeightGridView
                 android:id="@+id/trailer_grid"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -110,9 +110,11 @@
                 android:layout_marginBottom="@dimen/activity_vertical_margin"
                 android:layout_marginLeft="@dimen/activity_horizontal_margin"
                 android:layout_marginRight="@dimen/activity_horizontal_margin"
-                android:columnWidth="130dp"
+                android:horizontalSpacing="@dimen/activity_horizontal_margin"
                 android:numColumns="auto_fit"
-                android:stretchMode="columnWidth"></GridView>
+
+                android:stretchMode="columnWidth"
+                android:verticalSpacing="@dimen/activity_vertical_margin" />
 
             <TextView
                 android:id="@+id/reviews"
@@ -126,11 +128,11 @@
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textColor="@android:color/white" />
 
-            <ListView
-                android:id="@+id/review_list"
+            <com.example.nick.popularmovies.views.ExpandableHeightListView
+                android:id="@+id/review_grid"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/reviews"></ListView>
+                android:layout_below="@+id/reviews" />
 
         </RelativeLayout>
 
