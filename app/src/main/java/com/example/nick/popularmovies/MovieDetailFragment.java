@@ -77,12 +77,14 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
     //projection
     private static final String[] MOVIE_DETAIL_COLUMNS = {
-            //MovieEntry.TABLE_NAME + "." + MovieEntry._ID,
+            MovieEntry._ID,
+            MovieEntry.COLUMN_TITLE,
             MovieEntry.COLUMN_RATING,
             MovieEntry.COLUMN_SYNOPSIS,
-            MovieEntry.COLUMN_RATING,
+            MovieEntry.COLUMN_RELEASE_DATE,
             MovieEntry.COLUMN_IMAGE_LINK,
     };
+
 
     private static final String[] MOVIE_REVIEWS_COLUMNS = {
             MovieReviewsEntry.COLUMN_REVIEW,
@@ -364,6 +366,17 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        //could swap a cursor in a CursorAdapter, but we'll populate the data into our existing objects
+        switch(loader.getId()) {
+            case LOADER_MOVIE_DETAIL:
+                break;
+            case LOADER_MOVIE_REVIEW:
+                break;
+            case LOADER_MOVIE_DETAIL:
+                break;
+            default:
+                throw(Unknown)
+        }
 
     }
 

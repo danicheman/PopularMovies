@@ -41,20 +41,27 @@ import java.util.Arrays;
 
 public class MoviesFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    public  static final String KEY_MOVIES_LIST = "mMovieList";
+    public static final String KEY_MOVIES_LIST = "mMovieList";
     public static final String MOVIE_BUNDLE = "movieBundle";
     //result column identifiers
     static final int COL_MOVIE_ID = 0;
     static final int COL_IMAGE_LINK = 1;
+
     private static final String SELECTED_KEY = "selected_position";
+    private static final int MOVIE_LOADER = 0;
+
     private static final String[] MOVIE_COLUMNS = {
             MovieEntry._ID,
             MovieEntry.COLUMN_IMAGE_LINK
     };
     final String LOG_TAG = MoviesFragment.class.getSimpleName();
+
     //The adapter to prepare the data for the view
     private MovieAdapter mMovieAdapter;
-    private CursorAdapter mMovieDbAdapter;
+
+
+    //build a movie array with the cursor result instead of using a cursor adapter
+    //private CursorAdapter mMovieDbAdapter;
 
     private String mSortOrder;
 
@@ -86,12 +93,29 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
             return;
         }
 
-        FetchMoviesTask moviesTask = new FetchMoviesTask();
+
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         //get sort order or default_movie_image value
         mSortOrder = prefs.getString("sort_order", getResources().getStringArray(R.array.sort_order_option_values)[0]);
-        moviesTask.execute(mSortOrder);
+        if (mSortOrder != "favorites") {
+
+            //get movies from website
+            FetchMoviesTask moviesTask = new FetchMoviesTask();
+            moviesTask.execute(mSortOrder);
+        } else {
+
+            //get movies from database - if there were more than one type of data selection,
+            // we might use restartLoader() here.
+            getLoaderManager().initLoader(MOVIE_LOADER, null, this);
+        }
+
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        getLoaderManager().initLoader(MOVIE_LOADER, null, this);
+        super.onActivityCreated(savedInstanceState);
     }
 
     //Based on a stackoverflow snippet
@@ -165,23 +189,25 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        //sort order doesn't matter for favorites.
+
         // This is called when a new Loader needs to be created.  This
         // fragment only uses one loader, so we don't care about checking the id.
         //todo: get this from the strings.xml
-        String sortOrder = "popularity.desc";
-        Uri moviesSortedUri = MovieEntry.buildMovieUri(0);
+
+        Uri moviesUri = MovieEntry.CONTENT_URI;
         return new CursorLoader(getActivity(),
-                moviesSortedUri,
+                moviesUri,
                 MOVIE_COLUMNS,
                 null,
                 null,
-                sortOrder
+                null
         );
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        mMovieDbAdapter.swapCursor(data);
+
         if (mPosition != ListView.INVALID_POSITION) {
             // If we don't need to restart the loader, and there's a desired position to restore
             // to, do so now.
