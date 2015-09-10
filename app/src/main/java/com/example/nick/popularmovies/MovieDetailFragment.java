@@ -398,11 +398,70 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
             return false;
         }
 
+        /**
+         * Bulk insert reviews
+         *
+         * @return
+         */
         private boolean saveReviews() {
+
+            if (mReviews == null || mReviews.size() == 0) {
+                Log.d(LOG_TAG, "No reviews for movie " + movie.title);
+                return false;
+            }
+            ContentValues[] reviewCVArray = new ContentValues[mReviews.size()];
+
+            for (int i = 0; i < mReviews.size(); i++) {
+
+                reviewCVArray[i] = new ContentValues();
+                Review review = mReviews.get(i);
+                //move review data to contentvalues
+                reviewCVArray[i].put(MovieReviewsEntry.COLUMN_MOVIE_ID, review.movieId);
+                reviewCVArray[i].put(MovieReviewsEntry.COLUMN_REVIEW_ID, review.reviewId);
+                reviewCVArray[i].put(MovieReviewsEntry.COLUMN_AUTHOR, review.author);
+                reviewCVArray[i].put(MovieReviewsEntry.COLUMN_REVIEW_LINK, review.link);
+                reviewCVArray[i].put(MovieReviewsEntry.COLUMN_REVIEW, review.content);
+            }
+
+            int rowsInserted = getActivity().getContentResolver().bulkInsert(MovieReviewsEntry.CONTENT_URI, reviewCVArray);
+
+            if (rowsInserted == mReviews.size()) {
+                Log.d(LOG_TAG, "Successfully saved " + rowsInserted + " reviews!!" + movie.id);
+                return true;
+            }
+
             return false;
         }
 
+        //TODO: bulk insert trailers
         private boolean saveTrailers() {
+
+            if (mTrailers == null || mTrailers.size() == 0) {
+                Log.d(LOG_TAG, "No trailers for movie " + movie.title);
+                return false;
+            }
+
+            ContentValues[] trailerCVArray = new ContentValues[mTrailers.size()];
+
+            for (int i = 0; i < mTrailers.size(); i++) {
+
+                trailerCVArray[i] = new ContentValues();
+                Trailer trailer = mTrailers.get(i);
+                //move review data to contentvalues
+                //TODO: Change trailer.id to movie_id to trailer object?
+
+                trailerCVArray[i].put(MovieTrailersEntry.COLUMN_MOVIE_ID, movie.id);
+                trailerCVArray[i].put(MovieTrailersEntry.COLUMN_KEY, trailer.key);
+                trailerCVArray[i].put(MovieTrailersEntry.COLUMN_NAME, trailer.name);
+            }
+
+            int rowsInserted = getActivity().getContentResolver().bulkInsert(MovieTrailersEntry.CONTENT_URI, trailerCVArray);
+
+            if (rowsInserted == mReviews.size()) {
+                Log.d(LOG_TAG, "Successfully saved " + rowsInserted + " trailers!!");
+                return true;
+            }
+
             return false;
         }
 
