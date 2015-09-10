@@ -10,7 +10,7 @@
     <string name="settings_title">Popular Movie Settings</string>
     <string name="sort_order_title">Choose how movies will be ordered</string>
     <string name="sort_order_default">popularity.desc</string>
-
+    <string name="sort_order_favorites">favorites</string>
     <!-- Movie Detail -->
     <string name="title_activity_movie_detail">Movie Details</string>
 </resources>

@@ -1,7 +1,6 @@
 package com.example.nick.popularmovies;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
@@ -24,6 +23,7 @@ import android.widget.GridView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.example.nick.popularmovies.data.MovieContract;
 import com.example.nick.popularmovies.data.MovieContract.MovieEntry;
 
 import org.json.JSONArray;
@@ -55,6 +55,8 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
     //The adapter to prepare the data for the view
     private MovieAdapter mMovieAdapter;
     private CursorAdapter mMovieDbAdapter;
+
+    private String mSortOrder;
 
     //The array of movies retrieved from the server
     private ArrayList<Movie> mMovieList;
@@ -88,8 +90,8 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         //get sort order or default_movie_image value
-        String sortOrder = prefs.getString("sort_order", getResources().getStringArray(R.array.sort_order_option_values)[0]);
-        moviesTask.execute(sortOrder);
+        mSortOrder = prefs.getString("sort_order", getResources().getStringArray(R.array.sort_order_option_values)[0]);
+        moviesTask.execute(mSortOrder);
     }
 
     //Based on a stackoverflow snippet
@@ -126,17 +128,24 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Movie clickedMovie = (Movie) parent.getItemAtPosition(position);
-
+                if (clickedMovie == null) {
+                    Log.e(LOG_TAG, "on movie click handler but couldn't find movie for position" + position);
+                    return;
+                }
+                if (mSortOrder != getResources().getString(R.string.sort_order_favorites)) {
+                    //Movie clickedMovie = mMovieAdapter.getItem(position);
+                    //only use this if the sort is NOT favorites.
+                    /*Intent intent = new Intent(getActivity(), MovieDetailActivity.class)
+                            .putExtra(MOVIE_BUNDLE, clickedMovie);
+                    startActivity(intent);*/
+                    ((Callback) getActivity()).onItemSelected(clickedMovie);
+                } else {
+                    //pass uri
+                    ((Callback) getActivity()).onItemSelected(MovieContract.MovieEntry.buildMovieUri(clickedMovie.id));
+                }
                 //the callback launches the detail activity now..
-                //todo: different activity for click if sort is by favorites
-                /*if (clickedMovie != null ) {
-                    ((Callback) getActivity()).onItemSelected(MovieEntry.buildMovieUri(clickedMovie.id));
-                }*/
-                //Movie clickedMovie = mMovieAdapter.getItem(position);
-                //todo: only use this if the sort is NOT favorites.
-                Intent intent = new Intent(getActivity(), MovieDetailActivity.class)
-                        .putExtra(MOVIE_BUNDLE, clickedMovie);
-                startActivity(intent);
+
+
             }
         });
 
@@ -151,10 +160,6 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
             mPosition = savedInstanceState.getInt(SELECTED_KEY);
         }
 
-        //todo: need to do something here..
-        //mMovieAdapter.setUseTodayLayout(mUseTodayLayout);
-
-        // Inflate the layout for this fragment
         return rootView;
     }
 
@@ -199,6 +204,8 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
          * DetailFragmentCallback for when an item has been selected.
          */
         void onItemSelected(Uri movieUri);
+
+        void onItemSelected(Movie movie);
     }
 
     //This task does not save in the database.

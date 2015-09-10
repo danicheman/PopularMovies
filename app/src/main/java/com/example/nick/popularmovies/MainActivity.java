@@ -9,15 +9,15 @@ import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity implements MoviesFragment.Callback {
 
+    private static final String LOG_TAG = MainActivity.class.getSimpleName();
     private static final String DETAILFRAGMENT_TAG = "DFTAG";
     private boolean mTwoPane;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
-        /*getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setIcon(R.mipmap.ic_launcher);*/
 
         if(findViewById(R.id.movie_detail_container) != null) {
             /* The detail container view will be present only in the large-screen
@@ -32,11 +32,7 @@ public class MainActivity extends AppCompatActivity implements MoviesFragment.Ca
                         .add(R.id.movie_detail_container, new MovieDetailFragment(), DETAILFRAGMENT_TAG)
                         .commit();
             }
-        } else {
-            mTwoPane = false;
-
-        }
-
+        } else mTwoPane = false;
     }
 
     @Override
@@ -79,8 +75,44 @@ public class MainActivity extends AppCompatActivity implements MoviesFragment.Ca
 
     @Override
     public void onItemSelected(Uri movieUri) {
-        Intent intent = new Intent(this, MovieDetailActivity.class)
-                .setData(movieUri);
-        startActivity(intent);
+        if (mTwoPane) {
+            // In two-pane mode, show the detail view in this activity by
+            // adding or replacing the detail fragment using a
+            // fragment transaction.
+            Bundle args = new Bundle();
+            args.putParcelable(MovieDetailFragment.DETAIL_URI, movieUri);
+            MovieDetailFragment movieDetailFragment = new MovieDetailFragment();
+            movieDetailFragment.setArguments(args);
+
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.movie_detail_container, movieDetailFragment, DETAILFRAGMENT_TAG)
+                    .commit();
+        } else {
+            Intent intent = new Intent(this, MovieDetailActivity.class)
+                    .setData(movieUri);
+            startActivity(intent);
+        }
+
+    }
+
+    @Override
+    public void onItemSelected(Movie movie) {
+        //todo: pass uri if loading favorite!
+        if (mTwoPane) {
+            // In two-pane mode, show the detail view in this activity by
+            // adding or replacing the detail fragment using a
+            // fragment transaction.
+            Bundle args = new Bundle();
+            args.putParcelable(MovieDetailFragment.MOVIE_REFERENCE, movie);
+            MovieDetailFragment movieDetailFragment = new MovieDetailFragment();
+            movieDetailFragment.setArguments(args);
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.movie_detail_container, movieDetailFragment, DETAILFRAGMENT_TAG)
+                    .commit();
+        } else {
+            Intent intent = new Intent(this, MovieDetailActivity.class);
+            intent.putExtra(MoviesFragment.MOVIE_BUNDLE, movie);
+            startActivity(intent);
+        }
     }
 }

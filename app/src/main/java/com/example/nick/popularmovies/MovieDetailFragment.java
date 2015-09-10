@@ -1,6 +1,8 @@
 package com.example.nick.popularmovies;
 
 import android.content.ActivityNotFoundException;
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -57,17 +59,22 @@ import java.util.Date;
 
 //todo: separate movie detail fragment from favorite movie detail fragment?
 //todo: get reviews loading in expandable listview?
-public class MovieDetailFragment extends Fragment {
+public class MovieDetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+
+    //referencing and getting data from MainActivity with these constants
     static final String DETAIL_URI = "URI";
+    static final String MOVIE_REFERENCE = "MOVIE";
+
     private static final String LOG_TAG = MovieDetailFragment.class.getSimpleName();
     private static final String MOVIE_SHARE_HASHTAG = " #PopularMoviesApp";
     private static final String KEY_TRAILERS_LIST = "mTrailersList";
     private static final String KEY_REVIEWS_LIST = "mReviewsList";
+    private static final String MOVIE_ID_ARG = "movie_id";
 
     private static final int LOADER_MOVIE_DETAIL    = 0;
     private static final int LOADER_MOVIE_REVIEW    = 1;
     private static final int LOADER_MOVIE_TRAILER   = 2;
-    private static final String MOVIE_ID_ARG = "movie_id";
+
     //projection
     private static final String[] MOVIE_DETAIL_COLUMNS = {
             //MovieEntry.TABLE_NAME + "." + MovieEntry._ID,
@@ -166,7 +173,7 @@ public class MovieDetailFragment extends Fragment {
     };
 
     public MovieDetailFragment() {
-
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -177,7 +184,7 @@ public class MovieDetailFragment extends Fragment {
         mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
 
         if (mTrailers != null) {
-            mShareActionProvider.setShareIntent(createShareFirstTrailerIntent());
+            //mShareActionProvider.setShareIntent(createShareFirstTrailerIntent());
             Log.d(LOG_TAG, "setting share intent when creating options menu");
         } else {
             Log.d(LOG_TAG, "trailers were not available to initialize share intent");
@@ -200,18 +207,21 @@ public class MovieDetailFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+
+        //if the movie isn't set try to set it from the intent
+        //if(movie == null) {
         Intent intent = getActivity().getIntent();
         if (intent != null && intent.hasExtra(MoviesFragment.MOVIE_BUNDLE)) {
             movie = intent.getParcelableExtra(MoviesFragment.MOVIE_BUNDLE);
-            Log.d(LOG_TAG, "clicked movie with name:" + movie.title + "with id: " + movie.id);
-            if (movie.id != 0) {
-                fetchDetails(movie.id);
-            } else {
-                Log.d(LOG_TAG, "No movie id found for " + movie.title);
             }
+        //}
+
+
+        if (movie != null && movie.id != 0) {
+            fetchDetails(movie.id);
+        } else {
+            Log.d(LOG_TAG, "No movie found in onStart()");
         }
-
-
     }
 
     private void fetchDetails(int movieId) {
@@ -228,6 +238,12 @@ public class MovieDetailFragment extends Fragment {
         //get sort order or default_movie_image value
         //String sortOrder = prefs.getString("sort_order", getResources().getStringArray(R.array.sort_order_option_values)[0]);
 
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        getLoaderManager().initLoader(LOADER_MOVIE_DETAIL, null, this);
+        super.onActivityCreated(savedInstanceState);
     }
 
     @Override
@@ -273,39 +289,130 @@ public class MovieDetailFragment extends Fragment {
             }
         });
 
+        Bundle arguments = getArguments();
+        if (arguments != null) {
+            if (arguments.getParcelable(MOVIE_REFERENCE) != null) {
+                movie = arguments.getParcelable(MOVIE_REFERENCE);
+                Log.d(LOG_TAG, "got movie!");
+            } else {
+                Log.d(LOG_TAG, "didn't get movie :(");
+            }
+
+        }
         // The detail Activity called via intent.  Inspect the intent for movie data.
-        Intent intent = getActivity().getIntent();
-        if (intent != null && intent.hasExtra(MoviesFragment.MOVIE_BUNDLE)) {
-            Movie m = intent.getParcelableExtra(MoviesFragment.MOVIE_BUNDLE);
-
-            Resources res = getResources();
-            DecimalFormat df = new DecimalFormat("##.#");
-
-
-
-            SimpleDateFormat inputDate = new SimpleDateFormat("yyyy-MM-dd");
-            SimpleDateFormat outputDate = new SimpleDateFormat("EEEE, MMMM dd, yyyy");
-
-            try {
-                Date date = inputDate.parse(m.releaseDate);
-                String formattedReleaseDate = outputDate.format(date);
-
-                ((TextView) rootView.findViewById(R.id.movie_title)).setText(m.title);
-                ((TextView) rootView.findViewById(R.id.synopsis)).setText(Html.fromHtml(res.getText(R.string.synopsis) + " " + m.synopsis));
-                ((TextView) rootView.findViewById(R.id.release_date)).setText(Html.fromHtml(res.getText(R.string.release_date) + " " + formattedReleaseDate));
-                ((TextView) rootView.findViewById(R.id.rating_data)).setText(Html.fromHtml(res.getText(R.string.vote_average) + " " + df.format(m.userRating)));
-                ((RatingBar) rootView.findViewById(R.id.rating_bar)).setRating(m.userRating.floatValue());
-                ImageView backgroundMovieImage = (ImageView) rootView.findViewById(R.id.movie_image);
-                Picasso.with(getActivity())
-                        .load(UrlHelper.getMoviePosterLink(m))
-                        .into(backgroundMovieImage);
-
-            } catch (ParseException e) {
-                e.printStackTrace();
+        if (movie == null) {
+            Intent intent = getActivity().getIntent();
+            if (intent != null && intent.hasExtra(MoviesFragment.MOVIE_BUNDLE)) {
+                movie = intent.getParcelableExtra(MoviesFragment.MOVIE_BUNDLE);
             }
         }
 
+        //return loading screen here?
+        if (movie == null) return rootView;
+        Resources res = getResources();
+        DecimalFormat df = new DecimalFormat("##.#");
+
+
+        SimpleDateFormat inputDate = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat outputDate = new SimpleDateFormat("EEEE, MMMM dd, yyyy");
+
+        try {
+            Date date = inputDate.parse(movie.releaseDate);
+            String formattedReleaseDate = outputDate.format(date);
+
+            ((TextView) rootView.findViewById(R.id.movie_title)).setText(movie.title);
+            ((TextView) rootView.findViewById(R.id.synopsis)).setText(Html.fromHtml(res.getText(R.string.synopsis) + " " + movie.synopsis));
+            ((TextView) rootView.findViewById(R.id.release_date)).setText(Html.fromHtml(res.getText(R.string.release_date) + " " + formattedReleaseDate));
+            ((TextView) rootView.findViewById(R.id.rating_data)).setText(Html.fromHtml(res.getText(R.string.vote_average) + " " + df.format(movie.userRating)));
+            ((RatingBar) rootView.findViewById(R.id.rating_bar)).setRating(movie.userRating.floatValue());
+            rootView.findViewById(R.id.favorite).setOnClickListener(new AdapterView.OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    //add favorite
+                    SaveMovieDetailsTask saveMovieDetailsTask = new SaveMovieDetailsTask();
+                    saveMovieDetailsTask.execute();
+                }
+            });
+            ImageView backgroundMovieImage = (ImageView) rootView.findViewById(R.id.movie_image);
+            Picasso.with(getActivity())
+                    .load(UrlHelper.getMoviePosterLink(movie))
+                    .into(backgroundMovieImage);
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+
         return rootView;
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        return null;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+
+    }
+
+    public class SaveMovieDetailsTask extends AsyncTask<String, Void, Void> {
+
+        private boolean saveMovie() {
+            //pull movie from outer class
+            Cursor movieCursor = getActivity().getContentResolver().query(
+                    MovieEntry.CONTENT_URI,
+                    new String[]{MovieEntry._ID},
+                    MovieEntry._ID + " = ?",
+                    new String[]{Integer.toString(movie.id)},
+                    null
+            );
+            if (movieCursor.moveToFirst()) {
+                Log.d(LOG_TAG, "Cant save movie, same id already exists in db." + movie.id);
+                return false;
+            } else {
+                ContentValues movieValues = new ContentValues();
+
+                //move moviedata to contentvalues
+                movieValues.put(MovieEntry._ID, movie.id);
+                movieValues.put(MovieEntry.COLUMN_TITLE, movie.title);
+                movieValues.put(MovieEntry.COLUMN_RELEASE_DATE, movie.releaseDate);
+                movieValues.put(MovieEntry.COLUMN_SYNOPSIS, movie.synopsis);
+                movieValues.put(MovieEntry.COLUMN_IMAGE_LINK, movie.imageLink);
+                movieValues.put(MovieEntry.COLUMN_RATING, movie.userRating);
+
+                Uri insertedUri = getActivity().getContentResolver().insert(MovieEntry.CONTENT_URI, movieValues);
+                long insertedMovieId = ContentUris.parseId(insertedUri);
+                if (insertedMovieId == movie.id) {
+                    Log.d(LOG_TAG, "Successfully saved movie!!" + movie.id);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private boolean saveReviews() {
+            return false;
+        }
+
+        private boolean saveTrailers() {
+            return false;
+        }
+
+        @Override
+        protected Void doInBackground(String... params) {
+            saveMovie();
+            saveTrailers();
+            saveReviews();
+            return null;
+        }
     }
 
     /**
