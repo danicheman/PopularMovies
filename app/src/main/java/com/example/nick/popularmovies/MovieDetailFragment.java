@@ -328,10 +328,20 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
             rootView.findViewById(R.id.favorite).setOnClickListener(new AdapterView.OnClickListener() {
 
                 @Override
-                public void onClick(View v) {
-                    //add favorite
-                    SaveMovieDetailsTask saveMovieDetailsTask = new SaveMovieDetailsTask();
-                    saveMovieDetailsTask.execute();
+                public void onClick(View button) {
+
+                    button.setSelected(!button.isSelected());
+
+                    if (button.isSelected()) {
+                        //add favorite
+                        SaveMovieDetailsTask saveMovieDetailsTask = new SaveMovieDetailsTask();
+                        saveMovieDetailsTask.execute();
+                    } else {
+                        //remove favorite
+                        DeleteMovieDetailsTask deleteMovieDetailsTask = new DeleteMovieDetailsTask();
+                        deleteMovieDetailsTask.execute();
+                    }
+
                 }
             });
             ImageView backgroundMovieImage = (ImageView) rootView.findViewById(R.id.movie_image);
@@ -359,6 +369,85 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
+
+    }
+
+    //movie is a favorite and user de-selects the star
+    public class DeleteMovieDetailsTask extends AsyncTask<Void, Void, Void> {
+
+        private boolean deleteTrailers() {
+            int trailersDeleted = getActivity().getContentResolver().delete(
+                    MovieTrailersEntry.CONTENT_URI,
+                    MovieTrailersEntry.COLUMN_MOVIE_ID + " = " + movie.id,
+                    null);
+            if (trailersDeleted == -1) {
+                Log.e(LOG_TAG, "error deleting trailers, got back -1");
+            } else if (trailersDeleted == 0) {
+                Log.d(LOG_TAG, "didn't delete any trailers");
+                return true;
+            } else {
+                return true;
+            }
+
+            return false;
+        }
+
+        private boolean deleteReviews() {
+            int reviewsDeleted = getActivity().getContentResolver().delete(
+                    MovieReviewsEntry.CONTENT_URI,
+                    MovieReviewsEntry.COLUMN_MOVIE_ID + " = " + movie.id,
+                    null);
+            if (reviewsDeleted == -1) {
+                Log.e(LOG_TAG, "error deleting reviews, got back -1");
+
+            } else if (reviewsDeleted == 0) {
+                Log.d(LOG_TAG, "didn't delete any reviews");
+                return true;
+            } else {
+                return true;
+            }
+
+            return false;
+        }
+
+        private boolean deleteMovie() {
+            int moviesDeleted = getActivity().getContentResolver().delete(
+                    MovieEntry.CONTENT_URI,
+                    MovieEntry._ID + " = " + movie.id,
+                    null);
+            if (moviesDeleted == -1) {
+                Log.e(LOG_TAG, "error deleting movie, got back -1");
+            } else if (moviesDeleted == 0) {
+                Log.d(LOG_TAG, "didn't delete movie");
+                return true;
+            } else {
+                return true;
+            }
+
+            return false;
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+
+            Boolean dt = deleteTrailers();
+            Boolean dr = deleteReviews();
+            Boolean dm = deleteMovie();
+
+            CharSequence text;
+            //toast movie removed from favorites
+            if (dt && dr && dm) {
+                text = movie.title + " has been removed from your favorites.";
+            } else {
+                text = "Error removing " + movie.title + " from your favorites.";
+            }
+            int duration = Toast.LENGTH_SHORT;
+            Toast toast = Toast.makeText(getActivity(), text, duration);
+            toast.show();
+
+            return null;
+        }
+
 
     }
 
