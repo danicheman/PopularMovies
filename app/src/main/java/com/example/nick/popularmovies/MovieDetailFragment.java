@@ -70,6 +70,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     private static final String MOVIE_SHARE_HASHTAG = " #PopularMoviesApp";
     private static final String KEY_TRAILERS_LIST = "mTrailersList";
     private static final String KEY_REVIEWS_LIST = "mReviewsList";
+    private static final String KEY_MOVIE = "movie";
     private static final String MOVIE_ID_ARG = "movie_id";
 
     private static final int LOADER_MOVIE_DETAIL    = 0;
@@ -177,7 +178,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
             fetchDetails();
         } else {
 
-            Log.d(LOG_TAG, "No movie found in onStart()");
+            Log.e(LOG_TAG, "No movie found in onStart()");
         }
     }
 
@@ -221,6 +222,8 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         mReviews = new ArrayList<Review>();
 
         if (savedInstanceState != null) {
+            Log.d(LOG_TAG, "!!Loading from savedInstanceState!!");
+            if(savedInstanceState.containsKey(KEY_MOVIE)) movie = savedInstanceState.getParcelable(KEY_MOVIE);
             if(savedInstanceState.containsKey(KEY_TRAILERS_LIST)) {
                 mTrailers = savedInstanceState.getParcelableArrayList(KEY_TRAILERS_LIST);
             }
@@ -313,14 +316,20 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
                     CharSequence toastMsg;
 
                     if (!movie.isFavorite) {
+                        movie.isFavorite = true;
+
                         //add favorite
                         SaveMovieDetailsTask saveMovieDetailsTask = new SaveMovieDetailsTask();
                         saveMovieDetailsTask.execute();
+
                         toastMsg = " will be added to your favorites";
                     } else {
+                        movie.isFavorite = false;
+
                         //remove favorite
                         DeleteMovieDetailsTask deleteMovieDetailsTask = new DeleteMovieDetailsTask();
                         deleteMovieDetailsTask.execute();
+
                         int[] favoriteButtonState = new int[]{};
                         ((ImageButton) getView().findViewById(R.id.favorite)).setImageState(favoriteButtonState, false);
 
@@ -860,6 +869,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        outState.putParcelable(KEY_MOVIE, movie);
         outState.putParcelableArrayList(KEY_REVIEWS_LIST, mReviews);
         outState.putParcelableArrayList(KEY_TRAILERS_LIST, mTrailers);
     }

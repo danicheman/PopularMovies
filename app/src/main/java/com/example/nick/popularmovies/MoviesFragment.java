@@ -220,9 +220,9 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
         Log.d(LOG_TAG, "load finished with this many results: " + data.getCount());
         mMovieAdapter.clear();
         mMovieList.clear();
-        data.moveToPosition(-1);
+        //data.moveToPosition(-1);
         while (data.moveToNext()) {
-            Log.d(LOG_TAG, "iterating");
+            //Log.d(LOG_TAG, "iterating");
             mMovieAdapter.add(new Movie(data));
         }
 

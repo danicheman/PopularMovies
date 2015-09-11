@@ -44,7 +44,7 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
 
         Movie m = movies.get(position);
         String movieImageLink = UrlHelper.getMovieImageLink(m.imageLink);
-        Log.d("MovieAdapter", "loading image" + movieImageLink);
+        //Log.d("MovieAdapter", "loading image" + movieImageLink);
         if(movieImageLink != null ) {
             Picasso.with(getContext())
                     .load(movieImageLink)
