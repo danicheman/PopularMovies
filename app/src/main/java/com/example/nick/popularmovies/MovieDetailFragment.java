@@ -125,11 +125,15 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.menu_movie_detail, menu);
 
+        //Retrieve the share menu item
         MenuItem menuItem = menu.findItem(R.id.action_share);
+
+        // Get the provider and hold onto it to set/change the share intent.
         mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
 
-        if (mTrailers != null) {
-            //mShareActionProvider.setShareIntent(createShareFirstTrailerIntent());
+        //If we have the trailers, set them.
+        if (mTrailers != null && mTrailers.size() > 0) {
+            mShareActionProvider.setShareIntent(createShareFirstTrailerIntent());
             Log.d(LOG_TAG, "setting share intent when creating options menu");
         } else {
             Log.d(LOG_TAG, "trailers were not available to initialize share intent");
@@ -213,12 +217,16 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
         View rootView = inflater.inflate(R.layout.fragment_movie_detail, container, false);
 
+        mTrailers = new ArrayList<Trailer>();
+        mReviews = new ArrayList<Review>();
+
         if (savedInstanceState != null) {
-            mTrailers = savedInstanceState.getParcelableArrayList(KEY_TRAILERS_LIST);
-            mReviews = savedInstanceState.getParcelableArrayList(KEY_REVIEWS_LIST);
-        } else {
-            mTrailers = new ArrayList<Trailer>();
-            mReviews = new ArrayList<Review>();
+            if(savedInstanceState.containsKey(KEY_TRAILERS_LIST)) {
+                mTrailers = savedInstanceState.getParcelableArrayList(KEY_TRAILERS_LIST);
+            }
+            if(savedInstanceState.containsKey(KEY_REVIEWS_LIST)) {
+                mReviews = savedInstanceState.getParcelableArrayList(KEY_REVIEWS_LIST);
+            }
         }
 
         mReviewAdapter = new ReviewAdapter(getActivity(), R.layout.review, mReviews);
@@ -492,7 +500,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
     }
 
-    public class SaveMovieDetailsTask extends AsyncTask<String, Void, Void> {
+    public class SaveMovieDetailsTask extends AsyncTask<String, Void, Boolean> {
 
         private boolean saveMovie() {
             //pull movie from outer class
@@ -628,11 +636,22 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         }
 
         @Override
-        protected Void doInBackground(String... params) {
-            saveMovie();
-            saveTrailers();
-            saveReviews();
-            return null;
+        protected Boolean doInBackground(String... params) {
+            boolean sm = saveMovie();
+            boolean st = saveTrailers();
+            boolean sr = saveReviews();
+
+
+            return (sm && st && sr);
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result) {
+            //update da' star!
+            if(result) {
+                int[] favoriteButtonState = new int[]{android.R.attr.state_checked};
+                ((ImageButton) getView().findViewById(R.id.favorite)).setImageState(favoriteButtonState, false);
+            }
         }
     }
 
@@ -669,13 +688,13 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
 
                 //todo: fix share intent
-                /*if (mShareActionProvider != null && mTrailers != null && mTrailers.size() > 0) {
+                if (mShareActionProvider != null && mTrailers != null && mTrailers.size() > 0) {
                     Log.d(LOG_TAG, "setting share action provider from Fetch Movie Details Task");
                     //got one or more trailers, make the first one shareable.
                     mShareActionProvider.setShareIntent(createShareFirstTrailerIntent());
                 } else {
                     Log.d(LOG_TAG, "share action provider (view) was not initialized when trailers were loaded");
-                }*/
+                }
 
             }
 
@@ -837,4 +856,12 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
             return null;
         }
     }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList(KEY_REVIEWS_LIST, mReviews);
+        outState.putParcelableArrayList(KEY_TRAILERS_LIST, mTrailers);
+    }
+
 }
