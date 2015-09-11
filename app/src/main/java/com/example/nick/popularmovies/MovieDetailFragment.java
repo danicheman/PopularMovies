@@ -26,6 +26,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
@@ -280,6 +281,16 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
             Date date = inputDate.parse(movie.releaseDate);
             String formattedReleaseDate = outputDate.format(date);
 
+            if (movie.isFavorite) {
+                int[] favoriteButtonState = new int[]{android.R.attr.state_checked};
+                ((ImageButton) rootView.findViewById(R.id.favorite)).setImageState(favoriteButtonState, false);
+                ((TextView) rootView.findViewById(R.id.label_favorite)).setText(getResources().getText(R.string.remove_favorite));
+
+            } else {
+                //let it be in it's default button state
+                ((TextView) rootView.findViewById(R.id.label_favorite)).setText(getResources().getText(R.string.add_favorite));
+            }
+
             ((TextView) rootView.findViewById(R.id.movie_title)).setText(movie.title);
             ((TextView) rootView.findViewById(R.id.synopsis)).setText(Html.fromHtml(res.getText(R.string.synopsis) + " " + movie.synopsis));
             ((TextView) rootView.findViewById(R.id.release_date)).setText(Html.fromHtml(res.getText(R.string.release_date) + " " + formattedReleaseDate));
@@ -291,17 +302,25 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
                 public void onClick(View button) {
 
                     button.setSelected(!button.isSelected());
+                    CharSequence toastMsg;
 
-                    //if (button.isSelected()) {
                     if (!movie.isFavorite) {
                         //add favorite
                         SaveMovieDetailsTask saveMovieDetailsTask = new SaveMovieDetailsTask();
                         saveMovieDetailsTask.execute();
+                        toastMsg = " will be added to your favorites";
                     } else {
                         //remove favorite
                         DeleteMovieDetailsTask deleteMovieDetailsTask = new DeleteMovieDetailsTask();
                         deleteMovieDetailsTask.execute();
+                        int[] favoriteButtonState = new int[]{};
+                        ((ImageButton) getView().findViewById(R.id.favorite)).setImageState(favoriteButtonState, false);
+
+                        toastMsg = " will be removed from your favorites";
+                        //do toast?
+
                     }
+                    Toast.makeText(getActivity(), movie.title + toastMsg, Toast.LENGTH_SHORT).show();
 
                 }
             });
