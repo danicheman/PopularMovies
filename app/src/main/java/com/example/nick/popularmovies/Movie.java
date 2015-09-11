@@ -5,8 +5,6 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.example.nick.popularmovies.data.MovieContract;
-
 /**
  * Created by NICK on 7/15/2015.
  *
@@ -15,6 +13,13 @@ import com.example.nick.popularmovies.data.MovieContract;
  */
 public class Movie implements Parcelable{
 
+    //column ids
+    public static final int COLUMN_ID = 0;
+    public static final int COLUMN_TITLE = 1;
+    public static final int COLUMN_RELEASE_DATE = 2;
+    public static final int COLUMN_SYNOPSIS = 3;
+    public static final int COLUMN_IMAGE_LINK = 4;
+    public static final int COLUMN_RATING = 5;
     private static final String KEY_ID = "id";
     private static final String KEY_TITLE = "title";
     private static final String KEY_RELEASE_DATE = "releaseDate";
@@ -22,7 +27,7 @@ public class Movie implements Parcelable{
     private static final String KEY_SYNOPSIS = "synopsis";
     private static final String KEY_USER_RATING = "userRating";
     private static final String KEY_ORIGINAL_TITLE = "originalTitle";
-
+    private static final String KEY_IS_FAVORITE = "isFavorite";
     public int    id;
     public String title;
     public String originalTitle;
@@ -30,15 +35,7 @@ public class Movie implements Parcelable{
     public String imageLink;
     public String synopsis; //overview
     public Double userRating; //vote_average
-
-    //column ids
-    public static final int COLUMN_ID = 0;
-    public static final int COLUMN_TITLE = 1;
-    public static final int COLUMN_RATING = 2;
-    public static final int COLUMN_SYNOPSIS = 3;
-    public static final int COLUMN_RELEASE_DATE = 4;
-    public static final int COLUMN_IMAGE_LINK = 5;
-
+    public boolean isFavorite;
     public static final Parcelable.Creator<Movie> CREATOR = new Creator<Movie>() {
         @Override
         public Movie createFromParcel(Parcel source) {
@@ -49,11 +46,10 @@ public class Movie implements Parcelable{
             movie.id            = bundle.getInt(KEY_ID, 0);
             movie.title         = bundle.getString(KEY_TITLE, null);
             movie.releaseDate   = bundle.getString(KEY_RELEASE_DATE, null);
-            movie.imageLink     = bundle.getString(KEY_IMAGE_LINK, null);
             movie.synopsis      = bundle.getString(KEY_SYNOPSIS, null);
-            movie.originalTitle = bundle.getString(KEY_ORIGINAL_TITLE, null);
             movie.userRating    = bundle.getDouble(KEY_USER_RATING, 0);
-
+            movie.imageLink = bundle.getString(KEY_IMAGE_LINK, null);
+            movie.isFavorite = bundle.getBoolean(KEY_IS_FAVORITE, false);
             return movie;
         }
 
@@ -63,16 +59,21 @@ public class Movie implements Parcelable{
         }
     };
 
-    public void Movie(Cursor cursor) {
-        if (cursor != null && cursor.moveToFirst()) {
-            movie.id            = cursor.getInt(KEY_ID);
-            movie.title         = bundle.getString(KEY_TITLE, null);
-            movie.releaseDate   = bundle.getString(KEY_RELEASE_DATE, null);
-            movie.imageLink     = bundle.getString(KEY_IMAGE_LINK, null);
-            movie.synopsis      = bundle.getString(KEY_SYNOPSIS, null);
-            movie.originalTitle = bundle.getString(KEY_ORIGINAL_TITLE, null);
-            movie.userRating    = bundle.getDouble(KEY_USER_RATING, 0);
-        }
+    public Movie() {
+        isFavorite = false;
+    }
+
+    public Movie(Cursor cursor) {
+
+        id = cursor.getInt(COLUMN_ID);
+        title = cursor.getString(COLUMN_TITLE);
+        releaseDate = cursor.getString(COLUMN_RELEASE_DATE);
+        imageLink = cursor.getString(COLUMN_IMAGE_LINK);
+        synopsis = cursor.getString(COLUMN_SYNOPSIS);
+        userRating = cursor.getDouble(COLUMN_RATING);
+
+        //created from database so it's a favorite!
+        isFavorite = true;
     }
 
 
@@ -93,6 +94,7 @@ public class Movie implements Parcelable{
         bundle.putString(KEY_SYNOPSIS, synopsis);
         bundle.putString(KEY_ORIGINAL_TITLE, originalTitle);
         bundle.putDouble(KEY_USER_RATING, userRating);
+        bundle.putBoolean(KEY_IS_FAVORITE, isFavorite);
 
         //write the key value pairs to the parcel
         dest.writeBundle(bundle);

@@ -3,6 +3,7 @@
     android:id="@+id/detail"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@android:color/black"
     tools:context="com.example.nick.popularmovies.MovieDetailFragment">
     <ImageView
         android:id="@+id/movie_image"
@@ -31,10 +32,33 @@
                 android:textColor="@android:color/white" />
 
             <TextView
+                android:id="@+id/label_favorite"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/movie_title"
+                android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                android:layout_marginRight="@dimen/activity_horizontal_margin"
+                android:layout_marginTop="@dimen/movie_detail_vertical_margin"
+                android:text="@string/toggle_favorite"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@android:color/white"
+                android:textStyle="bold" />
+
+            <ImageButton
+                android:id="@+id/favorite"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/movie_title"
+                android:layout_marginTop="@dimen/star_vertical_margin"
+                android:layout_toRightOf="@id/label_favorite"
+                android:background="#00ffffff"
+
+                android:src="@drawable/btn_star_holo_dark" />
+            <TextView
                 android:id="@+id/release_date"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/movie_title"
+                android:layout_below="@+id/favorite"
                 android:layout_marginLeft="@dimen/activity_horizontal_margin"
                 android:layout_marginRight="@dimen/activity_horizontal_margin"
                 android:layout_marginTop="@dimen/movie_detail_vertical_margin"
@@ -83,13 +107,6 @@
                 android:text="3.8 out of 5"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textColor="@android:color/white" />
-            <ImageButton android:id="@+id/favorite"
-                android:layout_width="wrap_content"
-                android:layout_height="fill_parent"
-                android:layout_marginTop="@dimen/movie_detail_vertical_margin"
-                android:layout_toRightOf="@id/movie_title"
-                android:background="#00ffffff"
-                android:src="@drawable/btn_star_holo_dark" />
             <TextView
                 android:id="@+id/trailers"
                 android:layout_width="wrap_content"
@@ -100,19 +117,20 @@
                 android:layout_marginRight="@dimen/activity_horizontal_margin"
                 android:text="@string/trailers"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textColor="@android:color/white" />
+                android:textColor="@android:color/white"
+                android:textStyle="bold" />
 
             <com.example.nick.popularmovies.views.ExpandableHeightGridView
                 android:id="@+id/trailer_grid"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/trailers"
+                android:layout_centerHorizontal="true"
                 android:layout_marginBottom="@dimen/activity_vertical_margin"
                 android:layout_marginLeft="@dimen/activity_horizontal_margin"
                 android:layout_marginRight="@dimen/activity_horizontal_margin"
                 android:horizontalSpacing="@dimen/activity_horizontal_margin"
                 android:numColumns="auto_fit"
-
                 android:stretchMode="columnWidth"
                 android:verticalSpacing="@dimen/activity_vertical_margin" />
 
@@ -126,7 +144,8 @@
                 android:layout_marginRight="@dimen/activity_horizontal_margin"
                 android:text="@string/reviews"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textColor="@android:color/white" />
+                android:textColor="@android:color/white"
+                android:textStyle="bold" />
 
             <com.example.nick.popularmovies.views.ExpandableHeightListView
                 android:id="@+id/review_grid"

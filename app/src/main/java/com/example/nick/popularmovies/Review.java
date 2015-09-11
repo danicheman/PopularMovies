@@ -1,5 +1,6 @@
 package com.example.nick.popularmovies;
 
+import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -14,6 +15,15 @@ public class Review implements Parcelable{
     private static final String KEY_AUTHOR = "author";
     private static final String KEY_CONTENT = "content";
     private static final String KEY_LINK = "link";
+
+    //used to contstruct from cursor
+    private static final int COL_MOVIE_ID = 0;
+    private static final int COL_REVIEW_ID = 1;
+    private static final int COL_AUTHOR = 2;
+    private static final int COL_CONTENT = 3;
+    private static final int COL_LINK = 4;
+
+
     public String reviewId;
     public int movieId;
     public String author;
@@ -39,6 +49,19 @@ public class Review implements Parcelable{
             return new Review[0];
         }
     };
+
+    //main constructor with no args
+    public Review() {
+    }
+
+    //constructor using cursor
+    public Review(Cursor cursor) {
+        movieId = cursor.getInt(COL_MOVIE_ID);
+        reviewId = cursor.getString(COL_REVIEW_ID);
+        author = cursor.getString(COL_AUTHOR);
+        content = cursor.getString(COL_CONTENT);
+        link = cursor.getString(COL_LINK);
+    }
 
     @Override
     public int describeContents() {

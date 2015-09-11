@@ -14,7 +14,7 @@ import com.example.nick.popularmovies.data.MovieContract.MovieTrailersEntry;
 public class MovieDbHelper extends SQLiteOpenHelper {
 
     static final String DATABASE_NAME = "movies.db";
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 4;
 
     public MovieDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -29,9 +29,7 @@ public class MovieDbHelper extends SQLiteOpenHelper {
                 MovieEntry.COLUMN_RELEASE_DATE + " TEXT NOT NULL, " +
                 MovieEntry.COLUMN_SYNOPSIS + " TEXT NOT NULL, " +
                 MovieEntry.COLUMN_IMAGE_LINK + " TEXT NOT NULL, " +
-                MovieEntry.COLUMN_RATING + " REAL NOT NULL, " +
-                MovieEntry.COLUMN_IS_FAVORITE + " INTEGER DEFAULT 0, " +
-                MovieEntry.COLUMN_GOT_DETAILS + " INTEGER DEFAULT 0 " +
+                MovieEntry.COLUMN_RATING + " REAL NOT NULL " +
                 " )";
 
         db.execSQL(SQL_CREATE_MOVIE_TABLE);

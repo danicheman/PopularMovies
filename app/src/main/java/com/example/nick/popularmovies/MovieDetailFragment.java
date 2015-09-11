@@ -87,14 +87,19 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
 
     private static final String[] MOVIE_REVIEWS_COLUMNS = {
-            MovieReviewsEntry.COLUMN_REVIEW,
-            MovieReviewsEntry.COLUMN_REVIEW_LINK,
+            MovieReviewsEntry.COLUMN_MOVIE_ID,
+            MovieReviewsEntry.COLUMN_REVIEW_ID,
             MovieReviewsEntry.COLUMN_AUTHOR,
+            MovieReviewsEntry.COLUMN_REVIEW,
+            MovieReviewsEntry.COLUMN_REVIEW_LINK
+
     };
 
     private static final String[] MOVIE_TRAILERS_COLUMNS = {
-            MovieTrailersEntry.COLUMN_NAME,
+            MovieTrailersEntry.COLUMN_MOVIE_ID,
             MovieTrailersEntry.COLUMN_KEY,
+            MovieTrailersEntry.COLUMN_NAME
+
     };
 
 
@@ -110,69 +115,6 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
     private ArrayList<Trailer> mTrailers;
     private TrailerAdapter mTrailerAdapter;
-    private LoaderManager.LoaderCallbacks<Cursor> FavoriteLoader = new LoaderManager.LoaderCallbacks<Cursor>() {
-
-        @Override
-        public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-
-            if (args != null) {
-
-                long movieId = args.getLong(MOVIE_ID_ARG, 0);
-                switch (id) {
-                    case LOADER_MOVIE_DETAIL:
-                        return new CursorLoader(getActivity(),
-                                MovieContract.MovieEntry.buildMovieUri(movieId),
-                                MOVIE_DETAIL_COLUMNS,
-                                null,
-                                null,
-                                null);
-
-                    case LOADER_MOVIE_REVIEW:
-                        return new CursorLoader(getActivity(),
-                                MovieContract.MovieReviewsEntry.buildReviewUri(movieId),
-                                MOVIE_REVIEWS_COLUMNS,
-                                null,
-                                null,
-                                null);
-
-                    case LOADER_MOVIE_TRAILER:
-                        return new CursorLoader(getActivity(),
-                                MovieContract.MovieTrailersEntry.buildTrailerUri(movieId),
-                                MOVIE_TRAILERS_COLUMNS,
-                                null,
-                                null,
-                                null);
-                }
-            }
-
-            Log.e(LOG_TAG, "Unexpected switch case outcome due to unknown loader id");
-            return null;
-        }
-
-        @Override
-        public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-            /**
-             * Pull out the data, pop it into the views
-             */
-            if (data != null && data.moveToFirst()) {
-                switch (loader.getId()) {
-                    case LOADER_MOVIE_DETAIL:
-
-                        break;
-                    case LOADER_MOVIE_REVIEW:
-                        break;
-                    case LOADER_MOVIE_TRAILER:
-                        break;
-
-                }
-
-            }
-        }
-        @Override
-        public void onLoaderReset(Loader<Cursor> loader) {
-
-        }
-    };
 
     public MovieDetailFragment() {
         setHasOptionsMenu(true);
@@ -215,28 +157,44 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         Intent intent = getActivity().getIntent();
         if (intent != null && intent.hasExtra(MoviesFragment.MOVIE_BUNDLE)) {
             movie = intent.getParcelableExtra(MoviesFragment.MOVIE_BUNDLE);
+            Log.d(LOG_TAG,
+                    "Got movie through bundle");
+            if (movie.isFavorite) {
+                Log.d(LOG_TAG, "Seems movie was created from Cursor");
+            } else {
+                Log.d(LOG_TAG, "Seems movie was  NOOOOT created from Cursor");
+            }
             }
         //}
 
 
         if (movie != null && movie.id != 0) {
-            fetchDetails(movie.id);
+            fetchDetails();
         } else {
+
             Log.d(LOG_TAG, "No movie found in onStart()");
         }
     }
 
-    private void fetchDetails(int movieId) {
-        if (UrlHelper.API_KEY == null) {
+    private void fetchDetails() {
+
+        if (movie.isFavorite) {
+            Log.d(LOG_TAG, "USING Loader to fetch movie details for " + movie.title);
+            getLoaderManager().initLoader(LOADER_MOVIE_REVIEW, null, this);
+            getLoaderManager().initLoader(LOADER_MOVIE_TRAILER, null, this);
+        } else if (UrlHelper.API_KEY == null) {
             Toast toast = Toast.makeText(getActivity(), "Please set the API KEY in the URL Helper", Toast.LENGTH_LONG);
             toast.show();
             return;
+        } else {
+            Log.d(LOG_TAG, "USING API TO fetch movie details for " + movie.title);
+
+            FetchMovieDetailsTask detailsTask = new FetchMovieDetailsTask();
+            detailsTask.execute(movie.id);
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         }
 
-        Log.d(LOG_TAG, "Fetching movie details for id" + movieId);
-        FetchMovieDetailsTask detailsTask = new FetchMovieDetailsTask();
-        detailsTask.execute(movieId);
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+
         //get sort order or default_movie_image value
         //String sortOrder = prefs.getString("sort_order", getResources().getStringArray(R.array.sort_order_option_values)[0]);
 
@@ -244,7 +202,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
-        getLoaderManager().initLoader(LOADER_MOVIE_DETAIL, null, this);
+        //getLoaderManager().initLoader(LOADER_MOVIE_DETAIL, null, this);
         super.onActivityCreated(savedInstanceState);
     }
 
@@ -334,7 +292,8 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
                     button.setSelected(!button.isSelected());
 
-                    if (button.isSelected()) {
+                    //if (button.isSelected()) {
+                    if (!movie.isFavorite) {
                         //add favorite
                         SaveMovieDetailsTask saveMovieDetailsTask = new SaveMovieDetailsTask();
                         saveMovieDetailsTask.execute();
@@ -361,23 +320,71 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+
+        switch (id) {
+            case LOADER_MOVIE_DETAIL:
+                return new CursorLoader(getActivity(),
+                        MovieContract.MovieEntry.buildMovieUri(movie.id),
+                        MOVIE_DETAIL_COLUMNS,
+                        null,
+                        null,
+                        null);
+
+            case LOADER_MOVIE_REVIEW:
+                return new CursorLoader(getActivity(),
+                        MovieContract.MovieReviewsEntry.buildReviewUri(movie.id),
+                        MOVIE_REVIEWS_COLUMNS,
+                        null,
+                        null,
+                        null);
+
+            case LOADER_MOVIE_TRAILER:
+                return new CursorLoader(getActivity(),
+                        MovieContract.MovieTrailersEntry.buildTrailerUri(movie.id),
+                        MOVIE_TRAILERS_COLUMNS,
+                        null,
+                        null,
+                        null);
+        }
+        Log.e(LOG_TAG, "Unexpected switch case outcome due to unknown loader id");
         return null;
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+
         //could swap a cursor in a CursorAdapter, but we'll populate the data into our existing objects
         switch(loader.getId()) {
-            case LOADER_MOVIE_DETAIL:
-                break;
+            //MOVIE DATA SHOULD ALWAYS BE PASSED BY THE PARENT VIEW
+            /*case LOADER_MOVIE_DETAIL:
+                break;*/
             case LOADER_MOVIE_REVIEW:
+                Log.d(LOG_TAG, "load finished, got " + data.getCount() + " Reviews.");
+                mReviews = new ArrayList<Review>(data.getCount());
+                if (data.moveToFirst()) {
+                    //populate movie review array
+                    do {
+
+                        mReviews.add(new Review(data));
+                    } while (data.moveToNext());
+                    mReviewAdapter.addAll(mReviews);
+                    reviewList.setExpanded(true);
+                }
                 break;
-            case LOADER_MOVIE_DETAIL:
+            case LOADER_MOVIE_TRAILER:
+                Log.d(LOG_TAG, "load finished, got " + data.getCount() + " Trailers.");
+                mTrailers = new ArrayList<Trailer>(data.getCount());
+
+                //populate movie trailer array
+                while (data.moveToNext()) {
+                    mTrailers.add(new Trailer(data));
+                }
+                mTrailerAdapter.addAll(mTrailers);
+                trailerGrid.setExpanded(true);
                 break;
             default:
-                throw(Unknown)
+                throw new UnsupportedOperationException();
         }
-
     }
 
     @Override
@@ -424,6 +431,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         }
 
         private boolean deleteMovie() {
+            Log.d("DeleteMovieTask", "Deleting movie:" + movie.title);
             int moviesDeleted = getActivity().getContentResolver().delete(
                     MovieEntry.CONTENT_URI,
                     MovieEntry._ID + " = " + movie.id,
@@ -454,9 +462,10 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
             } else {
                 text = "Error removing " + movie.title + " from your favorites.";
             }
-            int duration = Toast.LENGTH_SHORT;
+            Log.d(LOG_TAG, text.toString());
+            /*int duration = Toast.LENGTH_SHORT;
             Toast toast = Toast.makeText(getActivity(), text, duration);
-            toast.show();
+            toast.show();*/
 
             return null;
         }
@@ -469,7 +478,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         private boolean saveMovie() {
             //pull movie from outer class
             Cursor movieCursor = getActivity().getContentResolver().query(
-                    MovieEntry.CONTENT_URI,
+                    MovieEntry.buildMovieUri(movie.id),
                     new String[]{MovieEntry._ID},
                     MovieEntry._ID + " = ?",
                     new String[]{Integer.toString(movie.id)},
@@ -496,7 +505,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
                     return true;
                 }
             }
-
+            movieCursor.close();
             return false;
         }
 
@@ -509,8 +518,23 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
             if (mReviews == null || mReviews.size() == 0) {
                 Log.d(LOG_TAG, "No reviews for movie " + movie.title);
-                return false;
+                return true;
             }
+            //pull movie id from outer class
+            Cursor reviewCursor = getActivity().getContentResolver().query(
+                    MovieReviewsEntry.buildReviewUri(movie.id),
+                    new String[]{MovieReviewsEntry.COLUMN_MOVIE_ID},
+                    MovieReviewsEntry.COLUMN_MOVIE_ID + " = ?",
+                    new String[]{Integer.toString(movie.id)},
+                    null
+            );
+
+            if (reviewCursor.moveToFirst()) {
+                Log.d(LOG_TAG, "Cant save reviews, " + reviewCursor.getCount() + "reviews already exist for this movie in the db." + movie.id);
+                reviewCursor.close();
+                return true;
+            }
+            reviewCursor.close();
             ContentValues[] reviewCVArray = new ContentValues[mReviews.size()];
 
             for (int i = 0; i < mReviews.size(); i++) {
@@ -528,7 +552,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
             int rowsInserted = getActivity().getContentResolver().bulkInsert(MovieReviewsEntry.CONTENT_URI, reviewCVArray);
 
             if (rowsInserted == mReviews.size()) {
-                Log.d(LOG_TAG, "Successfully saved " + rowsInserted + " reviews!!" + movie.id);
+                Log.d(LOG_TAG, "Successfully saved " + rowsInserted + " reviews!!");
                 return true;
             }
 
@@ -540,9 +564,24 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
             if (mTrailers == null || mTrailers.size() == 0) {
                 Log.d(LOG_TAG, "No trailers for movie " + movie.title);
-                return false;
+                return true;
             }
 
+            //pull movie from outer class
+            Cursor trailerCursor = getActivity().getContentResolver().query(
+                    MovieTrailersEntry.buildTrailerUri(movie.id),
+                    new String[]{MovieTrailersEntry.COLUMN_MOVIE_ID},
+                    MovieTrailersEntry.COLUMN_MOVIE_ID + " = ?",
+                    new String[]{Integer.toString(movie.id)},
+                    null
+            );
+
+            if (trailerCursor.moveToFirst()) {
+                Log.d(LOG_TAG, "Cant save trailers, " + trailerCursor.getCount() + " trailers already exist for this movie in the db.");
+                trailerCursor.close();
+                return true;
+            }
+            trailerCursor.close();
             ContentValues[] trailerCVArray = new ContentValues[mTrailers.size()];
 
             for (int i = 0; i < mTrailers.size(); i++) {
@@ -559,9 +598,11 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
             int rowsInserted = getActivity().getContentResolver().bulkInsert(MovieTrailersEntry.CONTENT_URI, trailerCVArray);
 
-            if (rowsInserted == mReviews.size()) {
+            if (rowsInserted == mTrailers.size()) {
                 Log.d(LOG_TAG, "Successfully saved " + rowsInserted + " trailers!!");
                 return true;
+            } else if (rowsInserted != mTrailers.size()) {
+                Log.e(LOG_TAG, "Rows inserted " + rowsInserted + " did not match the trailer size: " + mTrailers.size() + "trailers!!");
             }
 
             return false;
@@ -603,20 +644,19 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
                 mTrailers = new ArrayList<>(Arrays.asList(trailers));
                 mTrailerAdapter.clear();
                 for (Trailer t : trailers) {
-                    Log.v(LOG_TAG, "got trailer: " + t.name);
                     mTrailerAdapter.add(t);
                 }
                 trailerGrid.setExpanded(true);
 
 
-
-                if (mShareActionProvider != null) {
+                //todo: fix share intent
+                /*if (mShareActionProvider != null && mTrailers != null && mTrailers.size() > 0) {
                     Log.d(LOG_TAG, "setting share action provider from Fetch Movie Details Task");
                     //got one or more trailers, make the first one shareable.
                     mShareActionProvider.setShareIntent(createShareFirstTrailerIntent());
                 } else {
                     Log.d(LOG_TAG, "share action provider (view) was not initialized when trailers were loaded");
-                }
+                }*/
 
             }
 
@@ -651,11 +691,9 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         private void getMovieTrailersFromJson(JSONArray jsonTrailerArray, int movieId) throws JSONException {
 
             trailers = new Trailer[jsonTrailerArray.length()];
-            Log.d(LOG_TAG, "gettig trailers from JSON");
             for (int i = 0; i < jsonTrailerArray.length(); i++) {
 
                 JSONObject trailerData = jsonTrailerArray.getJSONObject(i);
-                Log.d(LOG_TAG, "gettig trailer " + trailerData.getString("name") + " from JSON");
                 trailers[i] = new Trailer();
                 trailers[i].key = trailerData.getString("source");
                 trailers[i].name = trailerData.getString("name");

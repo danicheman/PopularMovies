@@ -1,6 +1,7 @@
 package com.example.nick.popularmovies;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -43,7 +44,7 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
 
         Movie m = movies.get(position);
         String movieImageLink = UrlHelper.getMovieImageLink(m.imageLink);
-
+        Log.d("MovieAdapter", "loading image" + movieImageLink);
         if(movieImageLink != null ) {
             Picasso.with(getContext())
                     .load(movieImageLink)
