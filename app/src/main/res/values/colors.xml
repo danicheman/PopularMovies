@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="udacity_blue">#009688</color>
+    <color name="grey">#cccccc</color>
+    <color name="almost_black">#212121</color>
+</resources>

@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -22,7 +21,6 @@ import android.widget.GridView;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.example.nick.popularmovies.data.MovieContract;
 import com.example.nick.popularmovies.data.MovieContract.MovieEntry;
 
 import org.json.JSONArray;
@@ -42,9 +40,6 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
 
     public static final String KEY_MOVIES_LIST = "mMovieList";
     public static final String MOVIE_BUNDLE = "movieBundle";
-    //result column identifiers
-    static final int COL_MOVIE_ID = 0;
-    static final int COL_IMAGE_LINK = 1;
 
     private static final String SELECTED_KEY = "selected_position";
     private static final int MOVIE_LOADER = 0;
@@ -58,16 +53,9 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
             MovieEntry.COLUMN_IMAGE_LINK
     };
     final String LOG_TAG = MoviesFragment.class.getSimpleName();
-
+    public String mSortOrder;
     //The adapter to prepare the data for the view
     private MovieAdapter mMovieAdapter;
-
-
-    //build a movie array with the cursor result instead of using a cursor adapter
-    //private CursorAdapter mMovieDbAdapter;
-
-    //private String mSortOrder;
-
     //The array of movies retrieved from the server
     private ArrayList<Movie> mMovieList;
     private GridView mGridView;
@@ -77,11 +65,13 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
 
     }
 
+    /*
+    //bad form - no
     @Override
     public void onStart() {
         super.onStart();
         updateMovies();
-    }
+    }*/
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
@@ -89,7 +79,8 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
         outState.putParcelableArrayList(KEY_MOVIES_LIST, mMovieList);
     }
 
-    private void updateMovies() {
+
+    public void updateMovies(String sortOrder) {
         if(UrlHelper.API_KEY == null) {
             Toast toast = Toast.makeText(getActivity(), "Please set the API KEY in the URL Helper", Toast.LENGTH_LONG);
             toast.show();
@@ -97,10 +88,9 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
         }
 
 
-
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        //SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         //get sort order or default_movie_image value
-        String sortOrder = prefs.getString("sort_order", getResources().getStringArray(R.array.sort_order_option_values)[0]);
+        //String sortOrder = prefs.getString("sort_order", getResources().getStringArray(R.array.sort_order_option_values)[0]);
         if (!sortOrder.equals("favorites")) {
             mMovieAdapter.clear();
             Log.d(LOG_TAG, "some other sort order" + sortOrder);
@@ -120,10 +110,17 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
     public void onActivityCreated(Bundle savedInstanceState) {
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String sortOrder = prefs.getString("sort_order", getResources().getStringArray(R.array.sort_order_option_values)[0]);
+        mSortOrder = ((Callback) getActivity()).getSortOrder();
 
-        //if(savedInstanceState == null && sortOrder == "favorites")
-        getLoaderManager().initLoader(MOVIE_LOADER, null, this);
+        if (savedInstanceState == null && mSortOrder == "favorites") {
+            getLoaderManager().initLoader(MOVIE_LOADER, null, this);
+        } else if (savedInstanceState != null) {
+            //todo: do something
+            Log.e(LOG_TAG, "Returning from saved state?");
+        } else {
+            FetchMoviesTask fmt = new FetchMoviesTask();
+            fmt.execute(mSortOrder);
+        }
         super.onActivityCreated(savedInstanceState);
     }
 
@@ -161,26 +158,8 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Movie clickedMovie = (Movie) parent.getItemAtPosition(position);
-                if (clickedMovie == null) {
-                    Log.e(LOG_TAG, "on movie click handler but couldn't find movie for position" + position);
-                    return;
-                }
-                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-                String sortOrder = prefs.getString("sort_order", getResources().getStringArray(R.array.sort_order_option_values)[0]);
-                if (sortOrder != getResources().getString(R.string.sort_order_favorites)) {
-                    //Movie clickedMovie = mMovieAdapter.getItem(position);
-                    //only use this if the sort is NOT favorites.
-                    /*Intent intent = new Intent(getActivity(), MovieDetailActivity.class)
-                            .putExtra(MOVIE_BUNDLE, clickedMovie);
-                    startActivity(intent);*/
-                    ((Callback) getActivity()).onItemSelected(clickedMovie);
-                } else {
-                    //pass uri
-                    ((Callback) getActivity()).onItemSelected(MovieContract.MovieEntry.buildMovieUri(clickedMovie.id));
-                }
-                //the callback launches the detail activity now..
-
-
+                mPosition = position;
+                ((Callback) getActivity()).onItemSelected(clickedMovie);
             }
         });
 
@@ -226,6 +205,8 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
             mMovieAdapter.add(new Movie(data));
         }
 
+        //auto-load the first movie
+
         /*Log.d(LOG_TAG, "loading this many results into adapter:" + mMovieList.size());
         for(Movie m:mMovieList) {
 
@@ -253,7 +234,9 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
         /**
          * DetailFragmentCallback for when an item has been selected.
          */
-        void onItemSelected(Uri movieUri);
+        //only passing back movie now
+        //void onItemSelected(Uri movieUri);
+        String getSortOrder();
 
         void onItemSelected(Movie movie);
     }

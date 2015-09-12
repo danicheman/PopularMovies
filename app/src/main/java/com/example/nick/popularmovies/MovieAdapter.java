@@ -1,7 +1,6 @@
 package com.example.nick.popularmovies;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -35,7 +34,7 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
         ImageView moviePosterView;
 
         if (convertView == null) {
-            moviePosterView = new ImageView(getContext());
+            moviePosterView = (ImageView) View.inflate(getContext(), R.layout.movie_grid_cell, null);
             moviePosterView.setAdjustViewBounds(true);
             moviePosterView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         } else {

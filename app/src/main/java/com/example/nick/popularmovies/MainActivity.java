@@ -1,9 +1,11 @@
 package com.example.nick.popularmovies;
 
 import android.content.Intent;
-import android.net.Uri;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -12,6 +14,7 @@ public class MainActivity extends AppCompatActivity implements MoviesFragment.Ca
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
     private static final String DETAILFRAGMENT_TAG = "DFTAG";
     private boolean mTwoPane;
+    private String mSortOrder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,7 +22,11 @@ public class MainActivity extends AppCompatActivity implements MoviesFragment.Ca
 
         setContentView(R.layout.activity_main);
 
-        if(findViewById(R.id.movie_detail_container) != null) {
+        //get the sort order
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        mSortOrder = prefs.getString("sort_order", getResources().getStringArray(R.array.sort_order_option_values)[0]);
+
+        if (findViewById(R.id.movie_detail_container) != null) {
             /* The detail container view will be present only in the large-screen
             layouts res/layout-sw600dp). If this view is present, the the activity
             should be in two-pane mode. */
@@ -39,12 +46,47 @@ public class MainActivity extends AppCompatActivity implements MoviesFragment.Ca
     protected void onResume() {
         super.onResume();
 
-        //todo: get selected movie id
+        //get current sort
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        String currentlySelectedSortOrder = prefs.getString("sort_order", getResources().getStringArray(R.array.sort_order_option_values)[0]);
 
-        //todo: find fragment by tag
+        if (currentlySelectedSortOrder != null) {
+            Log.v(LOG_TAG, "on resume" + currentlySelectedSortOrder);
+        } else {
+            Log.v(LOG_TAG, "on resume no order");
+        }
 
-        //todo: on movie changed void method
+        if (currentlySelectedSortOrder != null && !currentlySelectedSortOrder.equals(mSortOrder)) {
 
+            //update both fragments with new sort order
+            MoviesFragment mf = (MoviesFragment) getSupportFragmentManager().findFragmentById(R.id.movie_grid_view);
+
+            /**
+             * Returning from options menu to main activity with potentially new sort method,
+             * Either this is tablet or phone layout, so
+             * we have the movie grid, or
+             * the movie grid AND the movie detail fragment.
+             *
+             * In the second case, let Movie Fragment populate the first movie through the
+             * callback.
+             */
+            if (mf != null) {
+                Log.v(LOG_TAG, "updating movie sort from Main Activity");
+                //update sort
+                mf.updateMovies(currentlySelectedSortOrder);
+            }
+
+            MovieDetailFragment mdf = (MovieDetailFragment) getSupportFragmentManager().findFragmentByTag(DETAILFRAGMENT_TAG);
+
+            if (mdf != null) {
+                //2 pane mode - simply reset detail pane
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.movie_detail_container, new MovieDetailFragment(), DETAILFRAGMENT_TAG)
+                        .commit();
+            }
+        } else {
+            Log.e(LOG_TAG, "did not resume as expected.");
+        }
     }
 
     @Override
@@ -53,7 +95,6 @@ public class MainActivity extends AppCompatActivity implements MoviesFragment.Ca
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
-
 
 
     @Override
@@ -73,7 +114,7 @@ public class MainActivity extends AppCompatActivity implements MoviesFragment.Ca
     }
 
 
-    @Override
+    /*@Override
     public void onItemSelected(Uri movieUri) {
         if (mTwoPane) {
             // In two-pane mode, show the detail view in this activity by
@@ -93,6 +134,15 @@ public class MainActivity extends AppCompatActivity implements MoviesFragment.Ca
             startActivity(intent);
         }
 
+    }*/
+
+    @Override
+    public String getSortOrder() {
+        if (mSortOrder == null) {
+            return getResources().getString(R.string.sort_order_default);
+        } else {
+            return mSortOrder;
+        }
     }
 
     @Override

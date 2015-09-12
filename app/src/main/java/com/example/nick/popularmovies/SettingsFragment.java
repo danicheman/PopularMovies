@@ -3,7 +3,6 @@ package com.example.nick.popularmovies;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
-import android.util.Log;
 
 
 /**
@@ -36,7 +35,5 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         String value = sharedPreferences.getString(key, "not set");
-        Log.v(LOG_TAG, "what changed key:"+key+"value"+value);
-
     }
 }
