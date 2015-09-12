@@ -7,10 +7,9 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 
 
-public class MovieDetailActivity extends AppCompatActivity {
+public class MovieDetailActivity extends AppCompatActivity implements MovieDetailFragment.Callback {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,4 +61,9 @@ public class MovieDetailActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    //nothing to do here..
+    @Override
+    public void refreshFavorites() {
+
+    }
 }

@@ -111,13 +111,18 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         mSortOrder = ((Callback) getActivity()).getSortOrder();
+        Log.d(LOG_TAG, "onActivityCreated, sort order: " + mSortOrder);
 
-        if (savedInstanceState == null && mSortOrder == "favorites") {
+        if (savedInstanceState == null && mSortOrder.equals("favorites")) {
+            Log.d(LOG_TAG, "Loading favorites");
             getLoaderManager().initLoader(MOVIE_LOADER, null, this);
         } else if (savedInstanceState != null) {
-            //todo: do something
             Log.e(LOG_TAG, "Returning from saved state?");
+            if (savedInstanceState.containsKey(KEY_MOVIES_LIST)) {
+                mMovieList = savedInstanceState.getParcelableArrayList(KEY_MOVIES_LIST);
+            }
         } else {
+            Log.d(LOG_TAG, "Creating new Fetch Movies Task");
             FetchMoviesTask fmt = new FetchMoviesTask();
             fmt.execute(mSortOrder);
         }
@@ -205,15 +210,7 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
             mMovieAdapter.add(new Movie(data));
         }
 
-        //auto-load the first movie
-
-        /*Log.d(LOG_TAG, "loading this many results into adapter:" + mMovieList.size());
-        for(Movie m:mMovieList) {
-
-            mMovieAdapter.add(m);
-        }*/
-
-        if (mPosition != ListView.INVALID_POSITION) {
+        if (mGridView != null && mPosition != ListView.INVALID_POSITION) {
             // If we don't need to restart the loader, and there's a desired position to restore
             // to, do so now.
             mGridView.smoothScrollToPosition(mPosition);

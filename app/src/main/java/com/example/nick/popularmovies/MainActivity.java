@@ -9,7 +9,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class MainActivity extends AppCompatActivity implements MoviesFragment.Callback {
+public class MainActivity extends AppCompatActivity implements MoviesFragment.Callback, MovieDetailFragment.Callback {
 
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
     private static final String DETAILFRAGMENT_TAG = "DFTAG";
@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity implements MoviesFragment.Ca
         String currentlySelectedSortOrder = prefs.getString("sort_order", getResources().getStringArray(R.array.sort_order_option_values)[0]);
 
         if (currentlySelectedSortOrder != null) {
-            Log.v(LOG_TAG, "on resume" + currentlySelectedSortOrder);
+            Log.v(LOG_TAG, "on resume " + currentlySelectedSortOrder + " and " + mSortOrder);
         } else {
             Log.v(LOG_TAG, "on resume no order");
         }
@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements MoviesFragment.Ca
                 //update sort
                 mf.updateMovies(currentlySelectedSortOrder);
             }
-
+            mSortOrder = currentlySelectedSortOrder;
             MovieDetailFragment mdf = (MovieDetailFragment) getSupportFragmentManager().findFragmentByTag(DETAILFRAGMENT_TAG);
 
             if (mdf != null) {
@@ -114,28 +114,6 @@ public class MainActivity extends AppCompatActivity implements MoviesFragment.Ca
     }
 
 
-    /*@Override
-    public void onItemSelected(Uri movieUri) {
-        if (mTwoPane) {
-            // In two-pane mode, show the detail view in this activity by
-            // adding or replacing the detail fragment using a
-            // fragment transaction.
-            Bundle args = new Bundle();
-            args.putParcelable(MovieDetailFragment.DETAIL_URI, movieUri);
-            MovieDetailFragment movieDetailFragment = new MovieDetailFragment();
-            movieDetailFragment.setArguments(args);
-
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.movie_detail_container, movieDetailFragment, DETAILFRAGMENT_TAG)
-                    .commit();
-        } else {
-            Intent intent = new Intent(this, MovieDetailActivity.class)
-                    .setData(movieUri);
-            startActivity(intent);
-        }
-
-    }*/
-
     @Override
     public String getSortOrder() {
         if (mSortOrder == null) {
@@ -164,5 +142,15 @@ public class MainActivity extends AppCompatActivity implements MoviesFragment.Ca
             intent.putExtra(MoviesFragment.MOVIE_BUNDLE, movie);
             startActivity(intent);
         }
+    }
+
+    @Override
+    public void refreshFavorites() {
+        if (mSortOrder.equals("favorites") && mTwoPane) {
+            MoviesFragment mf = (MoviesFragment) getSupportFragmentManager().findFragmentById(R.id.movie_grid_view);
+            mf.updateMovies(mSortOrder);
+        }
+
+
     }
 }

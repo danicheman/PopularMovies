@@ -58,8 +58,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 
-//todo: separate movie detail fragment from favorite movie detail fragment?
-//todo: get reviews loading in expandable listview?
 public class MovieDetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     //referencing and getting data from MainActivity with these constants
@@ -220,11 +218,12 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
         if (savedInstanceState != null) {
             Log.d(LOG_TAG, "!!Loading from savedInstanceState!!");
-            if(savedInstanceState.containsKey(KEY_MOVIE)) movie = savedInstanceState.getParcelable(KEY_MOVIE);
-            if(savedInstanceState.containsKey(KEY_TRAILERS_LIST)) {
+            if (savedInstanceState.containsKey(KEY_MOVIE))
+                movie = savedInstanceState.getParcelable(KEY_MOVIE);
+            if (savedInstanceState.containsKey(KEY_TRAILERS_LIST)) {
                 mTrailers = savedInstanceState.getParcelableArrayList(KEY_TRAILERS_LIST);
             }
-            if(savedInstanceState.containsKey(KEY_REVIEWS_LIST)) {
+            if (savedInstanceState.containsKey(KEY_REVIEWS_LIST)) {
                 mReviews = savedInstanceState.getParcelableArrayList(KEY_REVIEWS_LIST);
             }
         }
@@ -392,7 +391,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
 
         //could swap a cursor in a CursorAdapter, but we'll populate the data into our existing objects
-        switch(loader.getId()) {
+        switch (loader.getId()) {
             //MOVIE DATA SHOULD ALWAYS BE PASSED BY THE PARENT VIEW
             /*case LOADER_MOVIE_DETAIL:
                 break;*/
@@ -436,6 +435,10 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         outState.putParcelable(KEY_MOVIE, movie);
         outState.putParcelableArrayList(KEY_REVIEWS_LIST, mReviews);
         outState.putParcelableArrayList(KEY_TRAILERS_LIST, mTrailers);
+    }
+
+    public interface Callback {
+        void refreshFavorites();
     }
 
     //movie is a favorite and user de-selects the star
@@ -516,7 +519,12 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
             return null;
         }
 
-
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            Log.d(LOG_TAG, "refreshing favorites");
+            ((Callback) getActivity()).refreshFavorites();
+            super.onPostExecute(aVoid);
+        }
     }
 
     public class SaveMovieDetailsTask extends AsyncTask<String, Void, Boolean> {
