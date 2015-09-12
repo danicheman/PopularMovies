@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -50,12 +49,6 @@ public class MainActivity extends AppCompatActivity implements MoviesFragment.Ca
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         String currentlySelectedSortOrder = prefs.getString("sort_order", getResources().getStringArray(R.array.sort_order_option_values)[0]);
 
-        if (currentlySelectedSortOrder != null) {
-            Log.v(LOG_TAG, "on resume " + currentlySelectedSortOrder + " and " + mSortOrder);
-        } else {
-            Log.v(LOG_TAG, "on resume no order");
-        }
-
         if (currentlySelectedSortOrder != null && !currentlySelectedSortOrder.equals(mSortOrder)) {
 
             //update both fragments with new sort order
@@ -71,7 +64,6 @@ public class MainActivity extends AppCompatActivity implements MoviesFragment.Ca
              * callback.
              */
             if (mf != null) {
-                Log.v(LOG_TAG, "updating movie sort from Main Activity");
                 //update sort
                 mf.updateMovies(currentlySelectedSortOrder);
             }
@@ -84,8 +76,6 @@ public class MainActivity extends AppCompatActivity implements MoviesFragment.Ca
                         .replace(R.id.movie_detail_container, new MovieDetailFragment(), DETAILFRAGMENT_TAG)
                         .commit();
             }
-        } else {
-            Log.e(LOG_TAG, "did not resume as expected.");
         }
     }
 

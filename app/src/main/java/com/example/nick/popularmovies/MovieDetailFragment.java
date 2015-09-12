@@ -451,9 +451,6 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
                     null);
             if (trailersDeleted == -1) {
                 Log.e(LOG_TAG, "error deleting trailers, got back -1");
-            } else if (trailersDeleted == 0) {
-                Log.d(LOG_TAG, "didn't delete any trailers");
-                return true;
             } else {
                 return true;
             }
@@ -468,10 +465,6 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
                     null);
             if (reviewsDeleted == -1) {
                 Log.e(LOG_TAG, "error deleting reviews, got back -1");
-
-            } else if (reviewsDeleted == 0) {
-                Log.d(LOG_TAG, "didn't delete any reviews");
-                return true;
             } else {
                 return true;
             }
@@ -480,16 +473,13 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         }
 
         private boolean deleteMovie() {
-            Log.d("DeleteMovieTask", "Deleting movie:" + movie.title);
+            //Log.d("DeleteMovieTask", "Deleting movie:" + movie.title);
             int moviesDeleted = getActivity().getContentResolver().delete(
                     MovieEntry.CONTENT_URI,
                     MovieEntry._ID + " = " + movie.id,
                     null);
             if (moviesDeleted == -1) {
                 Log.e(LOG_TAG, "error deleting movie, got back -1");
-            } else if (moviesDeleted == 0) {
-                Log.d(LOG_TAG, "didn't delete movie");
-                return true;
             } else {
                 return true;
             }
@@ -506,12 +496,12 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
             CharSequence text;
             //toast movie removed from favorites
-            if (dt && dr && dm) {
+            /*if (dt && dr && dm) {
                 text = movie.title + " has been removed from your favorites.";
             } else {
                 text = "Error removing " + movie.title + " from your favorites.";
-            }
-            Log.d(LOG_TAG, text.toString());
+            }*/
+            //Log.d(LOG_TAG, text.toString());
             /*int duration = Toast.LENGTH_SHORT;
             Toast toast = Toast.makeText(getActivity(), text, duration);
             toast.show();*/
@@ -521,7 +511,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            Log.d(LOG_TAG, "refreshing favorites");
+            //Log.d(LOG_TAG, "refreshing favorites");
             ((Callback) getActivity()).refreshFavorites();
             super.onPostExecute(aVoid);
         }
@@ -555,7 +545,6 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
                 Uri insertedUri = getActivity().getContentResolver().insert(MovieEntry.CONTENT_URI, movieValues);
                 long insertedMovieId = ContentUris.parseId(insertedUri);
                 if (insertedMovieId == movie.id) {
-                    Log.d(LOG_TAG, "Successfully saved movie!!" + movie.id);
                     return true;
                 }
             }
@@ -571,7 +560,6 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         private boolean saveReviews() {
 
             if (mReviews == null || mReviews.size() == 0) {
-                Log.d(LOG_TAG, "No reviews for movie " + movie.title);
                 return true;
             }
             //pull movie id from outer class
@@ -584,7 +572,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
             );
 
             if (reviewCursor.moveToFirst()) {
-                Log.d(LOG_TAG, "Cant save reviews, " + reviewCursor.getCount() + "reviews already exist for this movie in the db." + movie.id);
+                //Log.d(LOG_TAG, "Cant save reviews, " + reviewCursor.getCount() + "reviews already exist for this movie in the db." + movie.id);
                 reviewCursor.close();
                 return true;
             }
@@ -605,19 +593,15 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
             int rowsInserted = getActivity().getContentResolver().bulkInsert(MovieReviewsEntry.CONTENT_URI, reviewCVArray);
 
-            if (rowsInserted == mReviews.size()) {
-                Log.d(LOG_TAG, "Successfully saved " + rowsInserted + " reviews!!");
-                return true;
-            }
+            return rowsInserted == mReviews.size();
 
-            return false;
         }
 
         //TODO: bulk insert trailers
         private boolean saveTrailers() {
 
             if (mTrailers == null || mTrailers.size() == 0) {
-                Log.d(LOG_TAG, "No trailers for movie " + movie.title);
+                //Log.d(LOG_TAG, "No trailers for movie " + movie.title);
                 return true;
             }
 
@@ -631,7 +615,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
             );
 
             if (trailerCursor.moveToFirst()) {
-                Log.d(LOG_TAG, "Cant save trailers, " + trailerCursor.getCount() + " trailers already exist for this movie in the db.");
+                //Log.d(LOG_TAG, "Cant save trailers, " + trailerCursor.getCount() + " trailers already exist for this movie in the db.");
                 trailerCursor.close();
                 return true;
             }
@@ -653,10 +637,10 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
             int rowsInserted = getActivity().getContentResolver().bulkInsert(MovieTrailersEntry.CONTENT_URI, trailerCVArray);
 
             if (rowsInserted == mTrailers.size()) {
-                Log.d(LOG_TAG, "Successfully saved " + rowsInserted + " trailers!!");
+                //Log.d(LOG_TAG, "Successfully saved " + rowsInserted + " trailers!!");
                 return true;
             } else if (rowsInserted != mTrailers.size()) {
-                Log.e(LOG_TAG, "Rows inserted " + rowsInserted + " did not match the trailer size: " + mTrailers.size() + "trailers!!");
+                //Log.e(LOG_TAG, "Rows inserted " + rowsInserted + " did not match the trailer size: " + mTrailers.size() + "trailers!!");
             }
 
             return false;
@@ -716,11 +700,11 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
                 //todo: fix share intent
                 if (mShareActionProvider != null && mTrailers != null && mTrailers.size() > 0) {
-                    Log.d(LOG_TAG, "setting share action provider from Fetch Movie Details Task");
+                    //Log.d(LOG_TAG, "setting share action provider from Fetch Movie Details Task");
                     //got one or more trailers, make the first one shareable.
                     mShareActionProvider.setShareIntent(createShareFirstTrailerIntent());
                 } else {
-                    Log.d(LOG_TAG, "share action provider (view) was not initialized when trailers were loaded");
+                    //Log.d(LOG_TAG, "share action provider (view) was not initialized when trailers were loaded");
                 }
 
             }
@@ -728,24 +712,16 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
             if (reviews != null) {
                 mReviews = new ArrayList<>(Arrays.asList(reviews));
-                Log.v(LOG_TAG, "Clearing reviews");
+                //Log.v(LOG_TAG, "Clearing reviews");
                 mReviewAdapter.clear();
                 for (Review r : reviews) {
-                    Log.v(LOG_TAG, "got review from: " + r.author);
+                    //Log.v(LOG_TAG, "got review from: " + r.author);
                     mReviewAdapter.add(r);
                 }
                 reviewList.setExpanded(true);
             }
 
         }
-
-        //todo:create constants for the two details queries.
-    /*final String TMDB_TITLE = "title";
-    final String TMDB_ORIGINAL_TITLE = "original_title";
-    final String TMDB_VOTE_AVERAGE = "vote_average";
-    final String TMDB_IMAGE_LINK = "poster_path";
-    final String TMDB_OVERVIEW = "overview";
-    final String TMDB_RELEASE_DATE = "release_date";*/
 
         /**
          * Get trailer details from the api and save them to a local private variable
@@ -864,7 +840,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
             }
 
             try {
-                Log.d(LOG_TAG, "completed loading details data, parsing");
+                //Log.d(LOG_TAG, "completed loading details data, parsing");
 
                 //get trailer results
                 JSONObject movieDetailJson = new JSONObject(moviesJsonStr);
@@ -874,7 +850,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
                 //get review results
                 JSONArray reviewArray = movieDetailJson.getJSONObject(TMDB_REVIEWS).getJSONArray(TMDB_RESULTS);
                 getMovieReviewsFromJson(reviewArray, movieId);
-                Log.d(LOG_TAG, "finished loading details data, adding to adapters in Post Execute method");
+                //Log.d(LOG_TAG, "finished loading details data, adding to adapters in Post Execute method");
             } catch (JSONException e) {
                 Log.e(LOG_TAG, e.getMessage(), e);
                 e.printStackTrace();

@@ -88,17 +88,14 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
         }
 
 
-        //SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        //get sort order or default_movie_image value
-        //String sortOrder = prefs.getString("sort_order", getResources().getStringArray(R.array.sort_order_option_values)[0]);
         if (!sortOrder.equals("favorites")) {
             mMovieAdapter.clear();
-            Log.d(LOG_TAG, "some other sort order" + sortOrder);
+            //Log.d(LOG_TAG, "some other sort order" + sortOrder);
             //get movies from website
             FetchMoviesTask moviesTask = new FetchMoviesTask();
             moviesTask.execute(sortOrder);
         } else {
-            Log.d(LOG_TAG, "favorites sort order");
+            //Log.d(LOG_TAG, "favorites sort order");
             //get movies from database - if there were more than one type of data selection,
             // we might use restartLoader() here.
             getLoaderManager().restartLoader(MOVIE_LOADER, null, this);
@@ -111,10 +108,8 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         mSortOrder = ((Callback) getActivity()).getSortOrder();
-        Log.d(LOG_TAG, "onActivityCreated, sort order: " + mSortOrder);
 
         if (savedInstanceState == null && mSortOrder.equals("favorites")) {
-            Log.d(LOG_TAG, "Loading favorites");
             getLoaderManager().initLoader(MOVIE_LOADER, null, this);
         } else if (savedInstanceState != null) {
             Log.e(LOG_TAG, "Returning from saved state?");
@@ -122,7 +117,6 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
                 mMovieList = savedInstanceState.getParcelableArrayList(KEY_MOVIES_LIST);
             }
         } else {
-            Log.d(LOG_TAG, "Creating new Fetch Movies Task");
             FetchMoviesTask fmt = new FetchMoviesTask();
             fmt.execute(mSortOrder);
         }
@@ -185,7 +179,7 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         //sort order doesn't matter for favorites.
-        Log.d(LOG_TAG, "load favorite movies");
+        //Log.d(LOG_TAG, "load favorite movies");
         // This is called when a new Loader needs to be created.  This
         // fragment only uses one loader, so we don't care about checking the id.
 

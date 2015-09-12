@@ -8,7 +8,7 @@ import java.net.URL;
  *
  */
 public class UrlHelper {
-    public static final String API_KEY = "b8a4068d1466dca29becff1029e0e0e1";
+    public static final String API_KEY = "";
     private static final String BASE_IMAGE_URL = "http://image.tmdb.org/t/p/w185";
     private static final String BASE_POSTER_URL = "http://image.tmdb.org/t/p/w500";
     private static final String BASE_YOUTUBE_VIDEO_URL = "https://www.youtube.com/watch?v=";
