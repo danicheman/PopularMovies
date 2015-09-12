@@ -11,6 +11,8 @@ import android.view.MenuItem;
 
 public class MovieDetailActivity extends AppCompatActivity implements MovieDetailFragment.Callback {
 
+    private boolean refreshMovieGrid = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,9 +63,23 @@ public class MovieDetailActivity extends AppCompatActivity implements MovieDetai
         return super.onOptionsItemSelected(item);
     }
 
-    //nothing to do here..
-    @Override
-    public void refreshFavorites() {
 
+    /**
+     * set an activity result that tells the previous activity to refresh
+     */
+    @Override
+    public void onBackPressed() {
+        int resultCode;
+        if (refreshMovieGrid) resultCode = MainActivity.RESULT_REFRESH;
+        else resultCode = MainActivity.RESULT_DO_NOTHING;
+        setResult(resultCode);
+        super.onBackPressed();
+    }
+
+
+    //Callback for detail fragment when adding or removing a movie from favorites.
+    @Override
+    public void refreshMovieGrid() {
+        refreshMovieGrid = true;
     }
 }

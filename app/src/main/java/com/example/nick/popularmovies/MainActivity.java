@@ -5,13 +5,18 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity implements MoviesFragment.Callback, MovieDetailFragment.Callback {
 
+    //different results for the Detail Fragment when working with a favorites sort.
+    public static final int RESULT_DO_NOTHING = 0;
+    public static final int RESULT_REFRESH = 1;
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
     private static final String DETAILFRAGMENT_TAG = "DFTAG";
+    private static final int DETAIL_ACTIVITY_RESULT = 1;
     private boolean mTwoPane;
     private String mSortOrder;
 
@@ -128,19 +133,40 @@ public class MainActivity extends AppCompatActivity implements MoviesFragment.Ca
                     .replace(R.id.movie_detail_container, movieDetailFragment, DETAILFRAGMENT_TAG)
                     .commit();
         } else {
+            //single pane..
             Intent intent = new Intent(this, MovieDetailActivity.class);
             intent.putExtra(MoviesFragment.MOVIE_BUNDLE, movie);
-            startActivity(intent);
+            startActivityForResult(intent, DETAIL_ACTIVITY_RESULT);
+        }
+    }
+
+    //refresh the grid after a favorite or unfavorite action
+    @Override
+    public void refreshMovieGrid() {
+        if (mSortOrder.equals("favorites")) {
+            MoviesFragment mf = (MoviesFragment) getSupportFragmentManager().findFragmentById(R.id.movie_grid_view);
+            if (mf == null) {
+                Log.e(LOG_TAG, "couldn't find Movie Fragment while trying to refresh grid of favorites.");
+            }
+            mf.updateMovies(mSortOrder);
         }
     }
 
     @Override
-    public void refreshFavorites() {
-        if (mSortOrder.equals("favorites") && mTwoPane) {
-            MoviesFragment mf = (MoviesFragment) getSupportFragmentManager().findFragmentById(R.id.movie_grid_view);
-            mf.updateMovies(mSortOrder);
-        }
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
 
+        switch (resultCode) {
+            case RESULT_DO_NOTHING:
+                break;
+            case RESULT_REFRESH:
+                MoviesFragment mf = (MoviesFragment) getSupportFragmentManager().findFragmentById(R.id.movie_grid_view);
+                if (mf == null) {
+                    Log.e(LOG_TAG, "couldn't find Movie Fragment while trying to refresh grid of favorites.");
+                }
+                mf.updateMovies(mSortOrder);
+                break;
+        }
 
     }
 }

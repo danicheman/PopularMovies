@@ -195,7 +195,11 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
 
-        Log.d(LOG_TAG, "load finished with this many results: " + data.getCount());
+        if (data.getCount() == 0) {
+            //toast no favorites message
+            Toast toast = Toast.makeText(getActivity(), getResources().getText(R.string.no_favorites), Toast.LENGTH_LONG);
+            toast.show();
+        }
         mMovieAdapter.clear();
         mMovieList.clear();
         //data.moveToPosition(-1);

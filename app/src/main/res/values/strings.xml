@@ -16,4 +16,5 @@
     <string name="toggle_favorite">Toggle Favorite:</string>
     <string name="add_favorite">Add Favorite:</string>
     <string name="remove_favorite">Remove Favorite:</string>
+    <string name="no_favorites">You don\'t have any favorite movies yet, why not add one? Change the sort settings to Popular or Rated.</string>
 </resources>

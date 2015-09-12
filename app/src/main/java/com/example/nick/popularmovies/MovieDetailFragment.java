@@ -335,6 +335,9 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
                         ((ImageButton) getView().findViewById(R.id.favorite)).setImageState(favoriteButtonState, false);
 
                         toastMsg = " will be removed from your favorites";
+
+                        //trigger finish to go back ?
+
                         //do toast?
 
                     }
@@ -438,7 +441,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     }
 
     public interface Callback {
-        void refreshFavorites();
+        void refreshMovieGrid();
     }
 
     //movie is a favorite and user de-selects the star
@@ -512,7 +515,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         @Override
         protected void onPostExecute(Void aVoid) {
             //Log.d(LOG_TAG, "refreshing favorites");
-            ((Callback) getActivity()).refreshFavorites();
+            ((Callback) getActivity()).refreshMovieGrid();
             super.onPostExecute(aVoid);
         }
     }
@@ -660,6 +663,9 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         protected void onPostExecute(Boolean result) {
             //update da' star!
             if (result) {
+
+                ((Callback) getActivity()).refreshMovieGrid();
+
                 int[] favoriteButtonState = new int[]{android.R.attr.state_checked};
                 ((ImageButton) getView().findViewById(R.id.favorite)).setImageState(favoriteButtonState, false);
             }
