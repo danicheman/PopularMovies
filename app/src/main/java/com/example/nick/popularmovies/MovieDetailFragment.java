@@ -176,10 +176,6 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
         if (movie != null && movie.id != 0) {
             fetchDetails();
-        } else {
-            //set "no movie" options
-
-            //Log.v(LOG_TAG, "No movie found in onStart()");
         }
     }
 
@@ -434,6 +430,14 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(KEY_MOVIE, movie);
+        outState.putParcelableArrayList(KEY_REVIEWS_LIST, mReviews);
+        outState.putParcelableArrayList(KEY_TRAILERS_LIST, mTrailers);
+    }
+
     //movie is a favorite and user de-selects the star
     public class DeleteMovieDetailsTask extends AsyncTask<Void, Void, Void> {
 
@@ -663,7 +667,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         @Override
         protected void onPostExecute(Boolean result) {
             //update da' star!
-            if(result) {
+            if (result) {
                 int[] favoriteButtonState = new int[]{android.R.attr.state_checked};
                 ((ImageButton) getView().findViewById(R.id.favorite)).setImageState(favoriteButtonState, false);
             }
@@ -870,217 +874,6 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
 
             return null;
         }
-    }
-
-    /**
-     * todo: fetch reviews
-     */
-    public class FetchMovieDetailsTask extends AsyncTask<Integer, Void, Void> {
-
-        final String LOG_TAG = FetchMovieDetailsTask.class.getSimpleName();
-
-        final String TMDB_TRAILERS = "trailers";
-        final String TMDB_TRAILERS_YT = "youtube";
-        final String TMDB_REVIEWS = "reviews";
-        final String TMDB_RESULTS = "results";
-
-        //private final Context mContext;
-        private Review[] reviews;
-        private Trailer[] trailers;
-
-        /**
-         * Populate Review and Trailer data into adapters
-         *
-         * @param aVoid
-         */
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            if (trailers != null) {
-                mTrailers = new ArrayList<>(Arrays.asList(trailers));
-                mTrailerAdapter.clear();
-                for (Trailer t : trailers) {
-                    mTrailerAdapter.add(t);
-                }
-                trailerGrid.setExpanded(true);
-
-
-                //todo: fix share intent
-                if (mShareActionProvider != null && mTrailers != null && mTrailers.size() > 0) {
-                    Log.d(LOG_TAG, "setting share action provider from Fetch Movie Details Task");
-                    //got one or more trailers, make the first one shareable.
-                    mShareActionProvider.setShareIntent(createShareFirstTrailerIntent());
-                } else {
-                    Log.d(LOG_TAG, "share action provider (view) was not initialized when trailers were loaded");
-                }
-
-            }
-
-
-            if (reviews != null) {
-                mReviews = new ArrayList<>(Arrays.asList(reviews));
-                Log.v(LOG_TAG, "Clearing reviews");
-                mReviewAdapter.clear();
-                for (Review r : reviews) {
-                    Log.v(LOG_TAG, "got review from: " + r.author);
-                    mReviewAdapter.add(r);
-                }
-                reviewList.setExpanded(true);
-            }
-
-        }
-
-        //todo:create constants for the two details queries.
-    /*final String TMDB_TITLE = "title";
-    final String TMDB_ORIGINAL_TITLE = "original_title";
-    final String TMDB_VOTE_AVERAGE = "vote_average";
-    final String TMDB_IMAGE_LINK = "poster_path";
-    final String TMDB_OVERVIEW = "overview";
-    final String TMDB_RELEASE_DATE = "release_date";*/
-
-        /**
-         * Get trailer details from the api and save them to a local private variable
-         *
-         * @param jsonTrailerArray
-         * @param movieId
-         * @throws JSONException
-         */
-        private void getMovieTrailersFromJson(JSONArray jsonTrailerArray, int movieId) throws JSONException {
-
-            trailers = new Trailer[jsonTrailerArray.length()];
-            for (int i = 0; i < jsonTrailerArray.length(); i++) {
-
-                JSONObject trailerData = jsonTrailerArray.getJSONObject(i);
-                trailers[i] = new Trailer();
-                trailers[i].key = trailerData.getString("source");
-                trailers[i].name = trailerData.getString("name");
-
-            }
-        }
-
-        /**
-         * Get review details from the api and save them to a local private variable
-         *
-         * @param reviewArray
-         * @param movieId
-         * @throws JSONException
-         */
-        private void getMovieReviewsFromJson(JSONArray reviewArray, int movieId) throws JSONException {
-
-            reviews = new Review[reviewArray.length()];
-
-            for (int i = 0; i < reviewArray.length(); i++) {
-
-                JSONObject reviewData = reviewArray.getJSONObject(i);
-                reviews[i] = new Review();
-
-                reviews[i].movieId = movieId;
-                reviews[i].reviewId = reviewData.getString("id");
-                reviews[i].content = reviewData.getString("content");
-                reviews[i].link = reviewData.getString("url");
-                reviews[i].author = reviewData.getString("author");
-            }
-        }
-
-        @Override
-        protected Void doInBackground(Integer... params) {
-
-            if (params.length == 0) {
-                return null;
-            }
-
-            int movieId = params[0];
-
-            if (movieId == 0) {
-                Log.e(LOG_TAG, "invalid movie id!! null or zero" + movieId);
-                return null;
-            }
-            // These two need to be declared outside the try/catch
-            // so that they can be closed in the finally block.
-            HttpURLConnection urlConnection = null;
-            BufferedReader reader = null;
-
-            // Will contain the raw JSON response as a string.
-            String moviesJsonStr = null;
-
-            try {
-                // Construct the URL for the themoviedb.org query
-                // Possible parameters are avaiable at TMDB's API page, at
-                // http://docs.themoviedb.apiary.io/#reference/discover/discovermovie
-                URL url = UrlHelper.getMovieDetailUrl(movieId);
-
-                // Create the request to themoviedb.org, and open the connection
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("GET");
-                urlConnection.connect();
-
-                // Read the input stream into a String
-                InputStream inputStream = urlConnection.getInputStream();
-                StringBuffer buffer = new StringBuffer();
-                if (inputStream == null) {
-                    // Nothing to do.
-                    return null;
-                }
-                reader = new BufferedReader(new InputStreamReader(inputStream));
-
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
-                    // But it does make debugging a *lot* easier if you print out the completed
-                    // buffer for debugging.
-                    buffer.append(line + "\n");
-                }
-
-                if (buffer.length() == 0) {
-                    // Stream was empty.  No point in parsing.
-                    return null;
-                }
-                moviesJsonStr = buffer.toString();
-
-            } catch (IOException e) {
-                Log.e(LOG_TAG, "Error ", e);
-                // If the code didn't successfully get the movie data, there's no point in attemping
-                // to parse it.
-                return null;
-            } finally {
-                if (urlConnection != null) {
-                    urlConnection.disconnect();
-                }
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (final IOException e) {
-                        Log.e(LOG_TAG, "Error closing stream", e);
-                    }
-                }
-            }
-
-            try {
-                Log.d(LOG_TAG, "completed loading details data, parsing");
-
-                //get trailer results
-                JSONObject movieDetailJson = new JSONObject(moviesJsonStr);
-                JSONArray trailerArray = movieDetailJson.getJSONObject(TMDB_TRAILERS).getJSONArray(TMDB_TRAILERS_YT);
-                getMovieTrailersFromJson(trailerArray, movieId);
-
-                //get review results
-                JSONArray reviewArray = movieDetailJson.getJSONObject(TMDB_REVIEWS).getJSONArray(TMDB_RESULTS);
-                getMovieReviewsFromJson(reviewArray, movieId);
-                Log.d(LOG_TAG, "finished loading details data, adding to adapters in Post Execute method");
-            } catch (JSONException e) {
-                Log.e(LOG_TAG, e.getMessage(), e);
-                e.printStackTrace();
-            }
-
-            return null;
-        }
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putParcelable(KEY_MOVIE, movie);
-        outState.putParcelableArrayList(KEY_REVIEWS_LIST, mReviews);
-        outState.putParcelableArrayList(KEY_TRAILERS_LIST, mTrailers);
     }
 
 }
